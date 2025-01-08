@@ -1,0 +1,21 @@
+<div class="row text-center">
+  <div class="col">
+    <p class="h3">Orarul autobuzelor din Slobozia</p>
+  </div>
+</div>
+
+<div class="row">
+  <div class="col col-2">
+    <%= form_tag :site_change_current_line do |form| %>
+      <label for="line_id" class="form-label">Linia:</label>
+      <%= select_tag :line_id, options_for_select(Line.all.map {|line| [line.name, line.id]}, current_line.id),
+                      class: 'form-select', onchange: 'this.form.submit()' %>
+    <% end %>
+  </div>
+</div>
+
+<% Station.all.each do |station| %>
+  <div class="row">
+    <div class="col"><%= station.name %></div>
+  </div>
+<% end %>
