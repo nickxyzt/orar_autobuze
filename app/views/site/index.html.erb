@@ -16,6 +16,8 @@
 
 <% Station.all.each do |station| %>
   <div class="row">
-    <div class="col"><%= station.name %></div>
+    <%= form_tag :site_confirm_stop do |form| %>
+      <div class="col bg-primary mt-3"><%= station.name %></div>
+    <% end %>
   </div>
 <% end %>

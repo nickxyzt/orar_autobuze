@@ -1,6 +1,8 @@
 Rails.application.routes.draw do
   get 'site/index'
   post 'site/change_current_line'
+  post 'site/confirm_stop'
+
   resources :special_days
   resources :stations
   resources :lines

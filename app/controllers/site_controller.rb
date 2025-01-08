@@ -10,6 +10,9 @@ class SiteController < ApplicationController
     redirect_to site_index_url
   end
 
+  def confirm_stop
+  end
+
   private
   def current_line
     Line.find session[:line_id]
