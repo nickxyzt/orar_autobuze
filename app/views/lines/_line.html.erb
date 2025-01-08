@@ -6,7 +6,7 @@
 
   <p>
     <strong>Station list:</strong>
-    <%= line.station_list.join(', ') %>
+    <%= line.stations.map {|station| station.name}.join(', ') %>
   </p>
 
 </div>
