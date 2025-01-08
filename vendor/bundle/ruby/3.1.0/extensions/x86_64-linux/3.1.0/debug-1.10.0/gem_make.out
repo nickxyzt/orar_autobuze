@@ -1,0 +1,16 @@
+current directory: /home/nicolae/work/rails_projects/orar_autobuze/vendor/bundle/ruby/3.1.0/gems/debug-1.10.0/ext/debug
+/home/nicolae/.rbenv/versions/3.1.2/bin/ruby -I /home/nicolae/.rbenv/versions/3.1.2/lib/ruby/3.1.0 -r ./siteconf20250108-14516-skmvmy.rb extconf.rb
+creating Makefile
+
+current directory: /home/nicolae/work/rails_projects/orar_autobuze/vendor/bundle/ruby/3.1.0/gems/debug-1.10.0/ext/debug
+make DESTDIR\= clean
+
+current directory: /home/nicolae/work/rails_projects/orar_autobuze/vendor/bundle/ruby/3.1.0/gems/debug-1.10.0/ext/debug
+make DESTDIR\=
+compiling debug.c
+compiling iseq_collector.c
+linking shared-object debug/debug.so
+
+current directory: /home/nicolae/work/rails_projects/orar_autobuze/vendor/bundle/ruby/3.1.0/gems/debug-1.10.0/ext/debug
+make DESTDIR\= install
+/usr/bin/install -c -m 0755 debug.so ./.gem.20250108-14516-7cnruo/debug

@@ -1,0 +1,14 @@
+<p style="color: green"><%= notice %></p>
+
+<h1>Special days</h1>
+
+<div id="special_days">
+  <% @special_days.each do |special_day| %>
+    <%= render special_day %>
+    <p>
+      <%= link_to "Show this special day", special_day %>
+    </p>
+  <% end %>
+</div>
+
+<%= link_to "New special day", new_special_day_path %>

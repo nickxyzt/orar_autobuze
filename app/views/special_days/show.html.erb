@@ -1,0 +1,10 @@
+<p style="color: green"><%= notice %></p>
+
+<%= render @special_day %>
+
+<div>
+  <%= link_to "Edit this special day", edit_special_day_path(@special_day) %> |
+  <%= link_to "Back to special days", special_days_path %>
+
+  <%= button_to "Destroy this special day", @special_day, method: :delete %>
+</div>
