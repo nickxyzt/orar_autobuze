@@ -1,0 +1,13 @@
+<%= link_to 'New stop', new_stop_url %>
+
+<h3>Lista opririlor</h3>
+<% @stops.each do |stop| %>
+  <div class="row">
+    <div class="col"><%= stop.line.name %></div>
+    <div class="col"><%= stop.station.name %></div>
+    <div class="col"><%= stop.created_at.strftime("%H:%M") %></div>
+    <div class="col"><%= link_to 'Edit', edit_stop_url(stop), class: 'btn btn-outline-primary' %></div>
+    <div class="col"><%= button_to 'Destroy', stop, method: :delete, class: 'btn btn-outline-danger' %></div>
+  </div>
+<% end %>
+

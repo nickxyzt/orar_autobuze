@@ -1,0 +1,21 @@
+<h1>New stop</h1>
+<%= form_with(model: @stop) do |form| %>
+  <div>
+    <%= form.label :line_id, style: "display: block" %>
+    <%= form.collection_select :line_id, Line.all.order(:name), :id, :name %>
+  </div>
+
+  <div>
+    <%= form.label :station_id, style: "display: block" %>
+    <%= form.collection_select :station_id, Station.all.order(:name), :id, :name %>
+  </div>
+
+  <div>
+    <%= form.label :created_at, style: "display: block" %>
+    <%= form.datetime_field :created_at %>
+  </div>
+
+  <div>
+    <%= form.submit %>
+  </div>
+<% end %>

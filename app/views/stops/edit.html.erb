@@ -1,0 +1,14 @@
+<h1>Editing stop</h1>
+<%= form_with(model: @stop) do |form| %>
+  <div>Line: <%= @stop.line.name %></div>
+  <div>Station: <%= @stop.station.name %></div>
+  <br>
+  <div>
+    <%= form.label :created_at, style: "display: block" %>
+    <%= form.datetime_field :created_at %>
+  </div>
+
+  <div>
+    <%= form.submit %>
+  </div>
+<% end %>
