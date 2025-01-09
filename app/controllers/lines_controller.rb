@@ -3,7 +3,7 @@ class LinesController < ApplicationController
 
   # GET /lines or /lines.json
   def index
-    @lines = Line.all
+    @lines = Line.order(:name)
   end
 
   # GET /lines/1 or /lines/1.json
