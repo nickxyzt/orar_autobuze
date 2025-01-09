@@ -84,7 +84,7 @@ class SiteController < ApplicationController
   def confirm_stop
     new_stop = Stop.new(station_id: params[:modal_station_id], line_id: params[:modal_line_id], session_id: request.session.id)
     new_stop.save
-    redirect_to site_index_url, notice: "Mulțumim implicarea ta în comunitate!|success"
+    redirect_to site_index_url, notice: "Mulțumim pentru implicarea ta în comunitate!|success"
   end
 
 end
