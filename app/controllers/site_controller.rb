@@ -48,11 +48,22 @@ class SiteController < ApplicationController
         hour, minute = start_time.split(':').map(&:to_i)
         moment_start = hour * 60 + minute
 
-        # ajustare moment_start cu valoarea medie a statiei precedente, daca exista
+        # ajustare moment_start cu valoarea medie a unei statii precedente, daca exista
         # (pentru a cauta intr-un interval mai probabil)
-        if station_index > 0 and @res[station_index-1][line_index]
-          moment_start = @res[station_index-1][line_index]
+        prev_station_index = nil
+        if station_index > 0
+          station_index.downto(1) do |i|
+            # DOAR daca statia gasita NU este repetarea acestei statii!
+            if @current_line.station_list[i] != @current_line.station_list[station_index] and @res[i][line_index]
+              prev_station_index = i
+              break;
+            end
+          end
         end
+        if prev_station_index
+          moment_start = @res[prev_station_index][line_index]
+        end
+
         # calculare intervalul de "moment_start" 
         # (in functie de lungimea maxima a liniei)
         interval = moment_start..(moment_start+@current_line.max_time_length - 1)
