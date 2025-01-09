@@ -2,8 +2,6 @@ class SiteController < ApplicationController
   helper_method :current_line
 
   def index
-    session[:line_id] ||= Line.first.id
-
     # ultima confirmare venita de la user pentru linia curenta
     latest_user_confirmation = current_line.stops.
       where(session_id: session[:session_id]).
@@ -86,6 +84,13 @@ class SiteController < ApplicationController
 
   private
   def current_line
-    Line.find session[:line_id]
+    if session[:line_id]
+      Line.find session[:line_id]
+    else
+      raise 'NoLine'
+    end
+    rescue
+      Line.first
+    end
   end
 end
