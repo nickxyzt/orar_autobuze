@@ -1,3 +1,4 @@
+<%= @res %>
 <div class="row d-flex align-items-end">
   <div class="col col-1">
     <label for="line_id" class="form-label">Linia:</label>
@@ -15,9 +16,9 @@
 <%# stabilim pe care intervale avem macar un stop pentru macar o statie %>
 <%# pentru a afisa coloana in tabel sau nu %>
 <% valid_intervals = [] %>
-<% @res.first[1].size.times do |i| # coloana din tabel %>
-  <% @current_stations.each do |station| %>
-    <% if @res[station.id][i] %>
+<% @res[0].size.times do |i| # coloana din tabel %>
+  <% @current_stations.size.times do |station_index| %>
+    <% if @res[station_index][i] %>
       <% valid_intervals << i %>
     <% end %>
   <% end %>
@@ -40,11 +41,11 @@
     </tr>
   </thead>
   <tbody class="table-group-divider">
-    <% @current_stations.each_with_index do |station, index| %>
+    <% @current_stations.each_with_index do |station, station_index| %>
       <tr>
         <td>
           <% extra_class = "btn-success" %>
-          <% if @last_station_confirmed_index and index <= @last_station_confirmed_index %>
+          <% if @last_station_confirmed_index and station_index <= @last_station_confirmed_index %>
             <%= button_tag class: 'btn btn-info disabled' do %>
               <i class="bi bi-check-lg"></i>
             <% end %>
@@ -60,9 +61,9 @@
         <% valid_intervals.size.times do |i| %>
           <% if valid_intervals.include? i %>
             <td>
-              <% if @res[station.id][i] %>
-                <% hour = @res[station.id][i] / 60 %>
-                <% minute = @res[station.id][i] - 60*hour %>
+              <% if @res[station_index][i] %>
+                <% hour = @res[station_index][i] / 60 %>
+                <% minute = @res[station_index][i] - 60*hour %>
                 <%= "%02d" % hour %>:<%= "%02d" % minute %>
               <% end %>
             </td>

@@ -20,9 +20,9 @@ class SiteController < ApplicationController
     end
 
     # Calculare intervale si obtinere array-uri cu datele
-    @res = {} # un Hash cu rezultatele pentru linia curenta
-    @current_stations.each_with_index do |station, index|
-      @res[station.id] = [] # Vom avea un Array cu informatii relevante pentru fiecare statie
+    @res = [] # un Array cu rezultatele pentru fiecare statie din lista
+    @current_stations.each_with_index do |station, station_index|
+      @res[station_index] = [] # Vom avea un Array cu informatii relevante pentru fiecare statie
       stops = Stop.where(station_id: station.id).where(line_id: @current_line.id).
         order('created_at DESC').limit(500)
       # ar trebui ca cele din ultimele zile sa fie mai importante 
@@ -33,7 +33,7 @@ class SiteController < ApplicationController
 
       # Adaugam si orele de start conform graficului, ca si cum ar fi stopuri initiale
       # (doar pentru prima statie, evident!)
-      if index == 0
+      if station_index == 0
         ore_de_start = @current_line.start_times.map do |time| 
           time = time.split(":").map(&:to_i)
           time[0]*60 + time[1]
@@ -44,14 +44,14 @@ class SiteController < ApplicationController
 
       # luam momentul in care linia a sosit in statie in intervalul care incepe la ora hour_start
       # (luam o marja)
-      @current_line.start_times.each_with_index do |start_time, index_line|
+      @current_line.start_times.each_with_index do |start_time, line_index|
         hour, minute = start_time.split(':').map(&:to_i)
         moment_start = hour * 60 + minute
 
         # ajustare moment_start cu valoarea medie a statiei precedente, daca exista
         # (pentru a cauta intr-un interval mai probabil)
-        if index > 0 and @res[@current_stations[index-1].id][index_line]
-          moment_start = @res[@current_stations[index-1].id][index_line]
+        if station_index > 0 and @res[station_index-1][line_index]
+          moment_start = @res[station_index-1][line_index]
         end
         # calculare intervalul de "moment_start" 
         # (in functie de lungimea maxima a liniei)
@@ -71,8 +71,8 @@ class SiteController < ApplicationController
           # luam din sorted_stops valorile de +-15 minute fata de median, si la acestea calculam media
           selected = sorted_stops.select {|elem| (median-15..median+14).include? elem}
           # avem grija sa luam doar pe cele mai mari decat media intervalului precedent
-          if @res[station.id][-1]
-            selected = selected.select {|elem| elem > @res[station.id][-1]}
+          if @res[station_index][-1]
+            selected = selected.select {|elem| elem > @res[station_index][-1]}
           end
 
           if selected.size > 0
@@ -81,7 +81,7 @@ class SiteController < ApplicationController
         end
         # valoarea de afisat in tabel pentru momentul de start
         # pentru statia station_id
-        @res[station.id] << media 
+        @res[station_index] << media 
       end
 
     end
