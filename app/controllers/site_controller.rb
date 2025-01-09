@@ -89,8 +89,7 @@ class SiteController < ApplicationController
     else
       raise 'NoLine'
     end
-    rescue
-      Line.first
-    end
+  rescue
+    Line.first
   end
 end
