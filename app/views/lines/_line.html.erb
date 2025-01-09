@@ -14,4 +14,20 @@
     <%= line.stations.map {|station| station.name}.join(', ') %>
   </p>
 
+  <p>
+    <strong>Max time length:</strong>
+    <%= line.max_time_length %>
+  </p>
+
+
+  <p>
+    <strong>Start times:</strong>
+    <%= line.start_times.join(', ') %>
+  </p>
+
+  <p>
+    <strong>End times:</strong>
+    <%= line.end_times.join(', ') %>
+  </p>
+
 </div>

@@ -22,8 +22,23 @@
   </div>
 
   <div>
+    <%= form.label :max_time_length, style: "display: block" %>
+    <%= form.text_field :max_time_length %>
+  </div>
+
+  <div>
     <%= form.label :station_list, style: "display: block" %>
     <%= form.text_area :station_list, value: line.station_list.join(', ') %>
+  </div>
+
+  <div>
+    <%= form.label :start_times, style: "display: block" %>
+    <%= form.text_area :start_times, value: line.start_times.join(', ') %>
+  </div>
+
+  <div>
+    <%= form.label :end_times, style: "display: block" %>
+    <%= form.text_area :end_times, value: line.end_times.join(', ') %>
   </div>
 
   <div>
