@@ -44,14 +44,14 @@ class SiteController < ApplicationController
 
       # luam momentul in care linia a sosit in statie in intervalul care incepe la ora hour_start
       # (luam o marja)
-      @current_line.start_times.each do |start_time|
+      @current_line.start_times.each_with_index do |start_time, index_line|
         hour, minute = start_time.split(':').map(&:to_i)
         moment_start = hour * 60 + minute
 
         # ajustare moment_start cu valoarea medie a statiei precedente, daca exista
         # (pentru a cauta intr-un interval mai probabil)
-        if @current_stations[index-1] and @res[@current_stations[index-1]]
-          moment_start = @res[@current_stations[index-1]]
+        if index > 0 and @res[@current_stations[index-1].id][index_line]
+          moment_start = @res[@current_stations[index-1].id][index_line]
         end
         # calculare intervalul de "moment_start" 
         # (in functie de lungimea maxima a liniei)
