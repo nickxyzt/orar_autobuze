@@ -1,9 +1,14 @@
 class SiteController < ApplicationController
-  helper_method :current_line
-
   def index
+    unless session[:line_id]
+      @current_line = Line.first
+    else
+      @current_line = Line.find(session[:line_id])
+    end
+    @current_stations = @current_line.station_list.map {|station_id| Station.find(station_id)}
+
     # ultima confirmare venita de la user pentru linia curenta
-    latest_user_confirmation = current_line.stops.
+    latest_user_confirmation = @current_line.stops.
       where(session_id: session[:session_id]).
       where(line_id: session[:line_id]).
       where('created_at > ?', Time.now - 15.minutes).
@@ -11,14 +16,14 @@ class SiteController < ApplicationController
     if latest_user_confirmation
       # ultima statie confirmata
       station = Station.find latest_user_confirmation.station_id
-      @last_station_confirmed_index = current_line.stations.index(station)
+      @last_station_confirmed_index = @current_stations.index(station)
     end
 
     # Calculare intervale si obtinere array-uri cu datele
     @res = {} # un Hash cu rezultatele pentru linia curenta
-    current_line.stations.each_with_index do |station, index|
+    @current_stations.each_with_index do |station, index|
       @res[station.id] = [] # Vom avea un Array cu informatii relevante pentru fiecare statie
-      stops = Stop.where(station_id: station.id).where(line_id: current_line.id).
+      stops = Stop.where(station_id: station.id).where(line_id: @current_line.id).
         order('created_at DESC').limit(500)
       # ar trebui ca cele din ultimele zile sa fie mai importante 
       # decat cele din trecut, chiar daca sunt mai putine...
@@ -34,12 +39,12 @@ class SiteController < ApplicationController
 
         # ajustare moment_start cu valoarea medie a statiei precedente, daca exista
         # (pentru a cauta intr-un interval mai probabil)
-        if current_line.stations[index-1] and @res[current_line.stations[index-1]]
-          moment_start = @res[current_line.stations[index-1]]
+        if @current_stations[index-1] and @res[@current_stations[index-1]]
+          moment_start = @res[@current_stations[index-1]]
         end
         # calculare intervalul de "moment_start" 
         # (in functie de lungimea maxima a liniei)
-        interval = moment_start..(moment_start+current_line.max_time_length - 1)
+        interval = moment_start..(moment_start+@current_line.max_time_length - 1)
 
         # opririle pentru acest "moment"
         this_moment_stops = sorted_stops.select {|elem| interval.include? elem}
@@ -82,14 +87,4 @@ class SiteController < ApplicationController
     redirect_to site_index_url, notice: "Mulțumim implicarea ta în comunitate!|success"
   end
 
-  private
-  def current_line
-    if session[:line_id]
-      Line.find session[:line_id]
-    else
-      raise 'NoLine'
-    end
-  rescue
-    Line.first
-  end
 end

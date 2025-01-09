@@ -17,6 +17,7 @@
 !/log/.keep
 !/tmp/.keep
 *.swp
+.byebug-history
 
 # Ignore pidfiles, but keep the directory.
 /tmp/pids/*

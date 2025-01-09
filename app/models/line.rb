@@ -4,6 +4,7 @@ class Line < ApplicationRecord
   serialize :station_list, Array
   has_many :stops
 
+  # de folosit doar in scaffold-ul stations!
   def stations
     station_list.map {|station_id| Station.find(station_id)}
   end
@@ -14,7 +15,7 @@ class Line < ApplicationRecord
 
   private
   def unique_stations
-    if stations.uniq.size != stations.size
+    if station_list.uniq.size != station_list.size
       errors.add :base, "Exista statii duplicat. Adauga in numele lor sufixe (ex: dus, intors) pentru a le face unice."
     end
   end
