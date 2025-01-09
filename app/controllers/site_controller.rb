@@ -29,13 +29,24 @@ class SiteController < ApplicationController
       # decat cele din trecut, chiar daca sunt mai putine...
 
       # Transformam totul doar in minute si sortam
-      sorted_stops = stops.map {|stop| hour = stop.created_at.hour; min = stop.created_at.min; hour*60 + min}.sort
+      stops = stops.map {|stop| hour = stop.created_at.hour; min = stop.created_at.min; hour*60 + min}
+
+      # Adaugam si orele de start conform graficului, ca si cum ar fi stopuri initiale
+      # (doar pentru prima statie, evident!)
+      if index == 0
+        ore_de_start = @current_line.start_times.map do |time| 
+          time = time.split(":").map(&:to_i)
+          time[0]*60 + time[1]
+        end
+        stops += ore_de_start
+      end
+      sorted_stops = stops.sort
 
       # luam momentul in care linia a sosit in statie in intervalul care incepe la ora hour_start
       # (luam o marja)
-      0.upto(23) do |moment_start| # folosim ore pentru inceputul momentului in care se face stopul
-        # transformare moment_start in minute
-        moment_start = moment_start * 60
+      @current_line.start_times.each do |start_time|
+        hour, minute = start_time.split(':').map(&:to_i)
+        moment_start = hour * 60 + minute
 
         # ajustare moment_start cu valoarea medie a statiei precedente, daca exista
         # (pentru a cauta intr-un interval mai probabil)

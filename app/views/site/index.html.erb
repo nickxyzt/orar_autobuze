@@ -57,7 +57,7 @@
         <td>
           <%= station.name %>
         </td>
-        <% 24.times do |i| %>
+        <% valid_intervals.size.times do |i| %>
           <% if valid_intervals.include? i %>
             <td>
               <% if @res[station.id][i] %>
