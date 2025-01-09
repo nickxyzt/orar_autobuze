@@ -17,6 +17,11 @@
   </div>
 
   <div>
+    <%= form.label :description, style: "display: block" %>
+    <%= form.text_field :description %>
+  </div>
+
+  <div>
     <%= form.label :station_list, style: "display: block" %>
     <%= form.text_area :station_list, value: line.station_list.join(', ') %>
   </div>

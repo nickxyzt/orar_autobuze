@@ -65,7 +65,7 @@ class LinesController < ApplicationController
 
     # Only allow a list of trusted parameters through.
     def line_params
-      params.require(:line).permit(:name, :station_list).tap do |whitelisted|
+      params.require(:line).permit(:name, :description, :station_list).tap do |whitelisted|
         whitelisted[:station_list] = whitelisted[:station_list].split(',').map(&:to_i) if whitelisted[:station_list].present?
       end
     end

@@ -5,6 +5,11 @@
   </p>
 
   <p>
+    <strong>Description:</strong>
+    <%= line.description %>
+  </p>
+
+  <p>
     <strong>Station list:</strong>
     <%= line.stations.map {|station| station.name}.join(', ') %>
   </p>
