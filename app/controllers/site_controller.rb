@@ -11,7 +11,7 @@ class SiteController < ApplicationController
     latest_user_confirmation = @current_line.stops.
       where(session_id: session[:session_id]).
       where(line_id: session[:line_id]).
-      where('created_at > ?', Time.now - 15.minutes).
+      where('created_at > ?', Time.zone.now - 15.minutes).
       order('created_at').last
     if latest_user_confirmation
       # ultima statie confirmata

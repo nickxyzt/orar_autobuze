@@ -24,54 +24,52 @@
 <% end %>
 <% valid_intervals = valid_intervals.uniq.sort %>
 
-<table class="table table-striped table-info table-sm caption-top table-responsive">
-  <caption class="text-center">
-    Orarul estimativ al autobuzelor din Slobozia <br>
-    pentru linia <%= @current_line.name %> <b><%= @current_line.description %></b><br>
-    pentru azi <%= Date.today.strftime("%d-%b-%Y") %>
-  </caption>
-  <thead>
-    <tr>
-      <th role="col">Confirmare</th>
-      <th role="col">Stație</th>
-      <% if valid_intervals.size > 0 %>
-        <th colspan="<%= valid_intervals.size %>" class="text-center">Momente</th>
-      <% end %>
-    </tr>
-  </thead>
-  <tbody class="table-group-divider">
-    <% @current_stations.each_with_index do |station, station_index| %>
+<div class="table-responsive">
+  <table class="table table-hover table-sm caption-top table-responsive">
+    <caption class="text-center">
+      Orarul estimativ al autobuzelor din Slobozia <br>
+      pentru linia <%= @current_line.name %> <b><%= @current_line.description %></b><br>
+      pentru azi <%= Time.zone.today.strftime("%d-%b-%Y") %>
+    </caption>
+    <thead>
       <tr>
-        <td>
-          <% extra_class = "btn-success" %>
-          <% if @last_station_confirmed_index and station_index <= @last_station_confirmed_index %>
-            <%= button_tag class: 'btn btn-info disabled' do %>
-              <i class="bi bi-check-lg"></i>
-            <% end %>
-          <% else %>
-            <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#modal_confirmare_stop" onclick="confirmation_modal(<%= @current_line.id %>, '<%= @current_line.name %>', <%= station.id %>, '<%= station.name %>')">
-              <i class="bi bi-check-lg"></i>
-            </button>
-          <% end %>
-        </td>
-        <td>
-          <%= station.name %>
-        </td>
-        <% valid_intervals.size.times do |i| %>
-          <% if valid_intervals.include? i %>
-            <td>
-              <% if @res[station_index][i] %>
-                <% hour = @res[station_index][i] / 60 %>
-                <% minute = @res[station_index][i] - 60*hour %>
-                <%= "%02d" % hour %>:<%= "%02d" % minute %>
-              <% end %>
-            </td>
-          <% end %>
+        <th role="col" class="border border-dark">Stație</th>
+        <% if valid_intervals.size > 0 %>
+          <th colspan="<%= valid_intervals.size %>" class="text-center border border-dark">Momente</th>
         <% end %>
       </tr>
-    <% end %>
-  </tbody>
-</table>
+    </thead>
+    <tbody class="table-group-divider">
+      <% @current_stations.each_with_index do |station, station_index| %>
+        <tr>
+          <td>
+            <% extra_class = "btn-success" %>
+            <% if @last_station_confirmed_index and station_index <= @last_station_confirmed_index %>
+              <%= button_tag class: 'btn btn-success disabled btn-sm' do %>
+                <i class="bi bi-check-lg"></i> <%= station.name %>
+              <% end %>
+            <% else %>
+              <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#modal_confirmare_stop" onclick="confirmation_modal(<%= @current_line.id %>, '<%= @current_line.name %>', <%= station.id %>, '<%= station.name %>')">
+                <i class="bi bi-check-lg"></i> <%= station.name %>
+              </button>
+            <% end %>
+          </td>
+          <% valid_intervals.size.times do |i| %>
+            <% if valid_intervals.include? i %>
+              <td class="text-center">
+                <% if @res[station_index][i] %>
+                  <% hour = @res[station_index][i] / 60 %>
+                  <% minute = @res[station_index][i] - 60*hour %>
+                  <%= "%02d" % hour %>:<%= "%02d" % minute %>
+                <% end %>
+              </td>
+            <% end %>
+          <% end %>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+</div>
 
 <!-- Modal -->
 <div class="modal fade" id="modal_confirmare_stop" tabindex="-1" aria-labelledby="confirmationModalLabel" aria-hidden="true">
@@ -96,10 +94,39 @@
 </div>
 
 <script>
+  // afisare modal de confirmare
   function confirmation_modal(line_id, line_name, station_id, station_name) {
     document.getElementById("modal_body_content").innerHTML = 'Confirmi că în acest moment linia <b>' + line_name + '</b> este în stația <b>' + station_name + '</b>?';
     document.getElementById("modal_line_id").value = line_id;
     document.getElementById("modal_station_id").value = station_id;
   }
+
+  // pastram culoarea default (din variabila CSS)
+  if (typeof default_bg_color === 'undefined') {
+    default_bg_color = getComputedStyle(document.querySelector(".table-hover tbody tr")).getPropertyValue('--bs-table-bg').trim();
+  }
+  odd_columns_bg_color = "#f2f2f2"
+
+  function color_table() {
+    // Reset background color on all cells
+    document.querySelectorAll('.table-hover tbody tr td').forEach(cell => cell.style.setProperty('background-color', default_bg_color));
+    // Color all cells in even columns
+    document.querySelectorAll('.table tbody tr td:nth-child(even)').forEach(row => row.style.setProperty("background-color", odd_columns_bg_color));
+  }
+
+  color_table();
+
+  // Add click event listener to each row in the table body
+  document.querySelectorAll(".table-hover tbody tr").forEach(row => {
+    row.addEventListener("click", () => {
+      color_table();
+      // Color the selected row
+      document.querySelectorAll('.table-hover tbody tr td').forEach(cell => {
+        if (cell.parentElement == row) 
+          cell.style.setProperty('background-color', 'rgba(var(--bs-info-rgb), 0.5)');
+      });
+    });
+  });
+
 </script>
 

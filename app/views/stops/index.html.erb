@@ -1,13 +1,27 @@
 <%= link_to 'New stop', new_stop_url %>
 
 <h3>Lista opririlor</h3>
-<% @stops.each do |stop| %>
-  <div class="row">
-    <div class="col"><%= stop.line.name %></div>
-    <div class="col"><%= stop.station.name %></div>
-    <div class="col"><%= stop.created_at.strftime("%H:%M") %></div>
-    <div class="col"><%= link_to 'Edit', edit_stop_url(stop), class: 'btn btn-outline-primary' %></div>
-    <div class="col"><%= button_to 'Destroy', stop, method: :delete, class: 'btn btn-outline-danger' %></div>
-  </div>
-<% end %>
-
+<table class="table table-striped table-hover">
+  <thead>
+    <tr>
+      <th>Linie</th>
+      <th>Statie</th>
+      <th>Created At</th>
+      <th>Session</th>
+      <th colspan="2">Actions</th>
+    </tr>
+  </thead>
+  <tbody>
+    <% @stops.each do |stop| %>
+      <tr>
+        <td><%= stop.line.name %></td>
+        <td><%= stop.station.name %></td>
+        <td><%= stop.created_at.strftime("%H:%M") %></td>
+        <td><%= stop.session_id %></td>
+        <td><%= link_to 'Edit', edit_stop_url(stop), class: 'btn btn-outline-primary' %></td>
+        <td><%= button_to 'Destroy', stop, method: :delete, class: 'btn btn-outline-danger' %></td>
+        </td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>
