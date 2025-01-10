@@ -49,7 +49,7 @@
                 <i class="bi bi-check-lg"></i> <%= station.name %>
               <% end %>
             <% else %>
-              <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#modal_confirmare_stop" onclick="confirmation_modal(<%= @current_line.id %>, '<%= @current_line.name %>', <%= station.id %>, '<%= station.name %>')">
+              <button type="button" class="btn btn-outline-primary btn-sm" data-bs-toggle="modal" data-bs-target="#modal_confirmare_stop" onclick="confirmation_modal(<%= @current_line.id %>, '<%= @current_line.name %>', <%= station.id %>, '<%= station.name %>')">
                 <i class="bi bi-check-lg"></i> <%= station.name %>
               </button>
             <% end %>

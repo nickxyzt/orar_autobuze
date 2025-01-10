@@ -31,7 +31,7 @@ class SiteController < ApplicationController
       # Transformam totul doar in minute si sortam
       stops = stops.map {|stop| hour = stop.created_at.hour; min = stop.created_at.min; hour*60 + min}
 
-      # Adaugam si orele de start conform graficului, ca si cum ar fi stopuri initiale
+      # Adaugam si orele de start si de final conform graficului, ca si cum ar fi stopuri initiale
       # (doar pentru prima statie, evident!)
       if station_index == 0
         ore_de_start = @current_line.start_times.map do |time| 
@@ -39,6 +39,13 @@ class SiteController < ApplicationController
           time[0]*60 + time[1]
         end
         stops += ore_de_start
+      end
+      if station_index == @current_stations.size - 1
+        ore_de_final = @current_line.end_times.map do |time| 
+          time = time.split(":").map(&:to_i)
+          time[0]*60 + time[1]
+        end
+        stops += ore_de_final
       end
       sorted_stops = stops.sort
 
