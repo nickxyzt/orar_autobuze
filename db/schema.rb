@@ -10,14 +10,14 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2025_01_09_192357) do
+ActiveRecord::Schema[7.0].define(version: 2025_01_10_135850) do
   create_table "lines", force: :cascade do |t|
     t.string "name"
     t.text "station_list"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.string "description"
-    t.integer "max_time_length", default: 30
+    t.integer "time_threshold", default: 10
     t.text "start_times"
     t.text "end_times"
   end

@@ -1,5 +1,5 @@
 <div class="row d-flex align-items-end">
-  <div class="col col-1">
+  <div class="col col-2">
     <label for="line_id" class="form-label">Linia:</label>
   </div>
   <div class="col col-8 col-md-5">
@@ -12,39 +12,26 @@
 
 <br>
 
-<%# stabilim pe care intervale avem macar un stop pentru macar o statie %>
-<%# pentru a afisa coloana in tabel sau nu %>
-<% valid_intervals = [] %>
-<% @res[0].size.times do |i| # coloana din tabel %>
-  <% @current_stations.size.times do |station_index| %>
-    <% if @res[station_index][i] %>
-      <% valid_intervals << i %>
-    <% end %>
-  <% end %>
-<% end %>
-<% valid_intervals = valid_intervals.uniq.sort %>
-
 <div class="table-responsive">
   <table class="table table-hover table-sm caption-top table-responsive">
     <caption class="text-center">
-      Orarul estimativ al autobuzelor din Slobozia <br>
+      Orarul estimativ al autobuzelor din Slobozia<br>
       pentru linia <%= @current_line.name %> <b><%= @current_line.description %></b><br>
       pentru azi <%= Time.zone.today.strftime("%d-%b-%Y") %>
     </caption>
     <thead>
       <tr>
-        <th role="col" class="border border-dark">Stație</th>
-        <% if valid_intervals.size > 0 %>
-          <th colspan="<%= valid_intervals.size %>" class="text-center border border-dark">Momente</th>
-        <% end %>
+        <th role="col" class="border border-dark text-center">Stație <i class="bi bi-bus-front"></i></th>
+        <th colspan="<%= @schedule.first.size %>" class="text-center border border-dark">Momente <i class="bi bi-clock-fill"></i></th>
       </tr>
     </thead>
     <tbody class="table-group-divider">
-      <% @current_stations.each_with_index do |station, station_index| %>
+      <% @schedule.size.times do |index_station| %>
+        <% station = @current_stations[index_station] %>
         <tr>
           <td>
             <% extra_class = "btn-success" %>
-            <% if @last_station_confirmed_index and station_index <= @last_station_confirmed_index %>
+            <% if @last_station_confirmed_index and index_station <= @last_station_confirmed_index %>
               <%= button_tag class: 'btn btn-success disabled btn-sm' do %>
                 <i class="bi bi-check-lg"></i> <%= station.name %>
               <% end %>
@@ -54,16 +41,16 @@
               </button>
             <% end %>
           </td>
-          <% valid_intervals.size.times do |i| %>
-            <% if valid_intervals.include? i %>
-              <td class="text-center">
-                <% if @res[station_index][i] %>
-                  <% hour = @res[station_index][i] / 60 %>
-                  <% minute = @res[station_index][i] - 60*hour %>
-                  <%= "%02d" % hour %>:<%= "%02d" % minute %>
-                <% end %>
-              </td>
-            <% end %>
+          <% @schedule[index_station].size.times do |index_cursa| %>
+            <td class="text-center text-secondary">
+              <% moment_estimat = @schedule[index_station][index_cursa][0] %>
+              <% moment_confirmat = @schedule[index_station][index_cursa][1] %>
+              <% unless moment_confirmat.blank? %>
+                <span class="text-success lead"><b><%= moment_confirmat %></b></span>
+              <% else %>
+                <span class="text-primary small"><%= moment_estimat %></span>
+              <% end %>
+            </td>
           <% end %>
         </tr>
       <% end %>
@@ -118,13 +105,22 @@
 
   // Add click event listener to each row in the table body
   document.querySelectorAll(".table-hover tbody tr").forEach(row => {
-    row.addEventListener("click", () => {
+    row.addEventListener("click", function(e){
       color_table();
       // Color the selected row
       document.querySelectorAll('.table-hover tbody tr td').forEach(cell => {
         if (cell.parentElement == row) 
           cell.style.setProperty('background-color', 'rgba(var(--bs-info-rgb), 0.5)');
       });
+      // Color the selected column
+      const cellIndex = e.target.cellIndex;
+      if (cellIndex > 0)
+      {
+        const rows = row.parentElement.rows;
+        for (let i = 0; i < rows.length; i++) {
+          rows[i].cells[cellIndex].style.backgroundColor = 'rgba(var(--bs-info-rgb), 0.5)';
+        }
+      }
     });
   });
 

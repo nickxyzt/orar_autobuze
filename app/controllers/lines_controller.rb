@@ -65,7 +65,7 @@ class LinesController < ApplicationController
 
     # Only allow a list of trusted parameters through.
     def line_params
-      params.require(:line).permit(:name, :description, :station_list, :max_time_length, :start_times, :end_times).tap do |whitelisted|
+      params.require(:line).permit(:name, :description, :station_list, :time_threshold, :start_times, :end_times).tap do |whitelisted|
         whitelisted[:station_list] = whitelisted[:station_list].split(',').map(&:to_i)
         whitelisted[:start_times] = whitelisted[:start_times].split(',').map {|elem| elem.strip}
         whitelisted[:end_times] = whitelisted[:end_times].split(',').map {|elem| elem.strip}
