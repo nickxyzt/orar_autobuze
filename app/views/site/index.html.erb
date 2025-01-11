@@ -1,7 +1,11 @@
+<% if Time.zone.now.on_weekend? %>
+  <div class="alert alert-danger">ATENȚIE - programul afișat este pentru cursele din timpul săptămânii!<br>Dar lucrăm să implementăm și programul de weekend!</div>
+<% end %>
+
+<div class="row">
+  <label for="line_id" class="form-label">Linia:</label>
+</div>
 <div class="row d-flex align-items-end">
-  <div class="col col-2">
-    <label for="line_id" class="form-label">Linia:</label>
-  </div>
   <div class="col col-8 col-md-5">
     <%= form_tag :site_change_current_line do |form| %>
       <%= select_tag :line_id, options_for_select(Line.order(:name).map {|line| ["#{line.name} #{line.description}", line.id]}, @current_line.id),
@@ -17,7 +21,7 @@
     <caption class="text-center">
       Orarul estimativ al autobuzelor din Slobozia<br>
       pentru linia <%= @current_line.name %> <b><%= @current_line.description %></b><br>
-      pentru azi <%= Time.zone.today.strftime("%d-%b-%Y") %>
+      pentru cursele din cursul săptămânii<br>
     </caption>
     <thead>
       <tr>
@@ -30,26 +34,42 @@
         <% station = @current_stations[index_station] %>
         <tr>
           <td>
-            <% extra_class = "btn-success" %>
-            <% if @last_station_confirmed_index and index_station <= @last_station_confirmed_index %>
+            <% if Time.zone.now.on_weekend? %>
               <%= button_tag class: 'btn btn-success disabled btn-sm' do %>
-                <i class="bi bi-check-lg"></i> <%= station.name %>
+                <%= station.name %>
               <% end %>
             <% else %>
-              <button type="button" class="btn btn-outline-primary btn-sm" data-bs-toggle="modal" data-bs-target="#modal_confirmare_stop" onclick="confirmation_modal(<%= @current_line.id %>, '<%= @current_line.name %>', <%= station.id %>, '<%= station.name %>')">
-                <i class="bi bi-check-lg"></i> <%= station.name %>
-              </button>
+              <% if @last_station_confirmed_index and index_station <= @last_station_confirmed_index %>
+                <%= button_tag class: 'btn btn-success disabled btn-sm' do %>
+                  <%= station.name %>
+                <% end %>
+              <% else %>
+                <button type="button" class="btn btn-outline-primary btn-sm" data-bs-toggle="modal" data-bs-target="#modal_confirmare_stop" onclick="confirmation_modal(<%= @current_line.id %>, '<%= @current_line.name %>', <%= station.id %>, '<%= station.name %>')">
+                  <i class="bi bi-check-lg"></i> <%= station.name %>
+                </button>
+              <% end %>
             <% end %>
           </td>
           <% @schedule[index_station].size.times do |index_cursa| %>
             <td class="text-center text-secondary">
               <% moment_estimat = @schedule[index_station][index_cursa][0] %>
               <% moment_confirmat = @schedule[index_station][index_cursa][1] %>
+
+              <%# Stabilire mesaj pentru popover %>
               <% unless moment_confirmat.blank? %>
-                <span class="text-success lead"><b><%= moment_confirmat %></b></span>
+                <% bs_title = moment_confirmat %>
+                <% bs_content = "Confirmat de călători." %>
               <% else %>
-                <span class="text-primary small"><%= moment_estimat %></span>
+                <% bs_title = moment_estimat %>
+                <% bs_content = "Calculat estimativ." %>
               <% end %>
+              <a tabindex="0" class="text-decoration-none" role="button" data-bs-toggle="popover" data-bs-trigger="focus" data-bs-title="<%= bs_title %>" data-bs-content="<%= bs_content %>">
+                <% unless moment_confirmat.blank? %>
+                  <span class="text-success lead"><b><%= moment_confirmat %></b></span>
+                <% else %>
+                  <span class="text-primary small"><%= moment_estimat %></span>
+                <% end %>
+              </a>
             </td>
           <% end %>
         </tr>
@@ -113,7 +133,7 @@
           cell.style.setProperty('background-color', 'rgba(var(--bs-info-rgb), 0.5)');
       });
       // Color the selected column
-      const cellIndex = e.target.cellIndex;
+      const cellIndex = e.target.closest('td').cellIndex;
       if (cellIndex > 0)
       {
         const rows = row.parentElement.rows;
@@ -123,6 +143,17 @@
       }
     });
   });
+
+  // Initialize all popovers
+  document.addEventListener('DOMContentLoaded', function () {
+    var popoverTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="popover"]'));
+    popoverTriggerList.forEach(function (popoverTriggerEl) {
+      new bootstrap.Popover(popoverTriggerEl);
+    });
+  });
+
+  // Make popovers dismissable
+  const popover = new bootstrap.Popover('.popover-dismiss', { trigger: 'focus' });
 
 </script>
 

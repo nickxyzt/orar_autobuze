@@ -1,3 +1,4 @@
+<%= render partial: 'menu/menu' %>
 <%= link_to 'New stop', new_stop_url %>
 
 <h3>Lista opririlor</h3>
@@ -16,7 +17,7 @@
       <tr>
         <td><%= stop.line.name %></td>
         <td><%= stop.station.name %></td>
-        <td><%= stop.created_at.strftime("%H:%M") %></td>
+        <td><%= stop.created_at.strftime("%A %H:%M") %></td>
         <td><%= stop.session_id %></td>
         <td><%= link_to 'Edit', edit_stop_url(stop), class: 'btn btn-outline-primary' %></td>
         <td><%= button_to 'Destroy', stop, method: :delete, class: 'btn btn-outline-danger' %></td>

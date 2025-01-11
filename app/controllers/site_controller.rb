@@ -14,7 +14,7 @@ class SiteController < ApplicationController
     stops = Stop.where(line_id: @current_line.id).
       order('created_at DESC').
       limit(@current_stations.size * 10 * @current_line.start_times.size).
-      map {|stop| Moment.new(stop.created_at.strftime("%H:%M"))}
+      map {|stop| [stop.station_id, Moment.new(stop.created_at.strftime("%H:%M"))]}
 
     # ultima confirmare venita de la user pentru linia curenta
     # (necesar pt a nu mai putea confirma statiile de dinaintea ei)
@@ -55,8 +55,8 @@ class SiteController < ApplicationController
 
         # identificam inregistrarile pe aceasta linie care sunt in jurul momentului
         # folosim campul time_threshold
-        matched_stops = stops.select{|stop| (stop.time - moment_estimat.time).abs <= @current_line.time_threshold}.
-          map {|moment| moment.time}
+        matched_stops = stops.select{|station_id, stop| station_id == station.id and (stop.time - moment_estimat.time).abs <= @current_line.time_threshold}.
+          map {|elem| elem[1].time}
         moment_mediu = nil
         if matched_stops.size > 0
           moment_mediu = Moment.new(matched_stops.sum / matched_stops.size).to_s
