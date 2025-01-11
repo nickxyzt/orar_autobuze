@@ -1,16 +1,15 @@
 <%= render partial: 'menu/menu' %>
-<p style="color: green"><%= notice %></p>
+<%= link_to "New line", new_line_path %>
 
 <h1>Lines</h1>
 
 <div id="lines">
   <% @lines.each do |line| %>
     <%= render line %>
-    <p>
-      <%= link_to "Show this line", line %>
-    </p>
+    <div>
+      <%= link_to "Edit this line", edit_line_url(line) %>
+      <%= button_to "Destroy this line", line, method: :delete, form: {style: 'display: inline'} %>
+    </div>
     <hr>
   <% end %>
 </div>
-
-<%= link_to "New line", new_line_path %>

@@ -1,7 +1,9 @@
 <h1>Editing stop</h1>
 <%= form_with(model: @stop) do |form| %>
   <div>Line: <%= @stop.line.name %></div>
-  <div>Station: <%= @stop.station.name %></div>
+  <div>
+    <%= form.label :station_id, style: "display: block" %>
+    <%= form.select :station_id, options_for_select(Station.all.order(:name).pluck(:name, :id), @stop.station_id) %>
   <br>
   <div>
     <%= form.label :created_at, style: "display: block" %>

@@ -38,7 +38,7 @@ class SpecialDaysController < ApplicationController
   def update
     respond_to do |format|
       if @special_day.update(special_day_params)
-        format.html { redirect_to @special_day, notice: "Special day was successfully updated." }
+        format.html { redirect_to special_days_url, notice: "Special day was successfully updated." }
         format.json { render :show, status: :ok, location: @special_day }
       else
         format.html { render :edit, status: :unprocessable_entity }
@@ -65,6 +65,6 @@ class SpecialDaysController < ApplicationController
 
     # Only allow a list of trusted parameters through.
     def special_day_params
-      params.require(:special_day).permit(:day)
+      params.require(:special_day).permit(:day, :kind_id)
     end
 end

@@ -12,8 +12,18 @@
   <% end %>
 
   <div>
-    <%= form.label :name, style: "display: block" %>
+    <%= form.label :nume_intern, style: "display: block" %>
     <%= form.text_field :name %>
+  </div>
+
+  <div>
+    <%= form.label :nume_de_afisat, style: "display: block" %>
+    <%= form.text_field :display_name %>
+  </div>
+
+  <div id="master_station_field" style="display: block">
+    <%= form.label :master_station_id, style: "display: block" %>
+    <%= form.select :master_station_id, [['<ea însăși>', 'self']] + Station.all.map { |station| [station.name, station.id] }, { selected: @station.master_station_id } %>
   </div>
 
   <div>

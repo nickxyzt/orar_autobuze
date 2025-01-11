@@ -17,6 +17,11 @@
   </div>
 
   <div>
+    <%= form.label :kind, style: "display: block" %>
+    <%= form.select :kind_id, options_for_select(SpecialDay::KINDS, special_day.kind_id) %>
+  </div>
+
+  <div>
     <%= form.submit %>
   </div>
 <% end %>

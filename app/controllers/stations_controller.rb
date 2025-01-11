@@ -1,5 +1,6 @@
 class StationsController < ApplicationController
   before_action :set_station, only: %i[ show edit update destroy ]
+  after_action  :set_master_station_if_self, only: %i[ create update]
 
   # GET /stations or /stations.json
   def index
@@ -25,7 +26,7 @@ class StationsController < ApplicationController
 
     respond_to do |format|
       if @station.save
-        format.html { redirect_to @station, notice: "Station was successfully created." }
+        format.html { redirect_to stations_url, notice: "Station was successfully created." }
         format.json { render :show, status: :created, location: @station }
       else
         format.html { render :new, status: :unprocessable_entity }
@@ -38,7 +39,7 @@ class StationsController < ApplicationController
   def update
     respond_to do |format|
       if @station.update(station_params)
-        format.html { redirect_to @station, notice: "Station was successfully updated." }
+        format.html { redirect_to stations_url, notice: "Station was successfully updated." }
         format.json { render :show, status: :ok, location: @station }
       else
         format.html { render :edit, status: :unprocessable_entity }
@@ -65,6 +66,13 @@ class StationsController < ApplicationController
 
     # Only allow a list of trusted parameters through.
     def station_params
-      params.require(:station).permit(:name)
+      params.require(:station).permit(:name, :display_name, :master_station_id)
+    end
+
+    def set_master_station_if_self
+      if station_params[:master_station_id] == "self"
+        @station.master_station_id = @station.id
+        @station.save
+      end
     end
 end

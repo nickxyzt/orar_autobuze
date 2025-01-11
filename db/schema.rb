@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2025_01_10_135850) do
+ActiveRecord::Schema[7.0].define(version: 2025_01_11_203513) do
   create_table "lines", force: :cascade do |t|
     t.string "name"
     t.text "station_list"
@@ -26,12 +26,15 @@ ActiveRecord::Schema[7.0].define(version: 2025_01_10_135850) do
     t.date "day"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.integer "kind_id", default: 1
   end
 
   create_table "stations", force: :cascade do |t|
     t.string "name"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.integer "master_station_id"
+    t.string "display_name"
   end
 
   create_table "stops", force: :cascade do |t|

@@ -1,15 +1,20 @@
 <%= render partial: 'menu/menu' %>
-<p style="color: green"><%= notice %></p>
-
 <h1>Special days</h1>
 
-<div id="special_days">
+<table class="table">
+  <tr>
+    <th>Day</th>
+    <th>Kind</th>
+    <th colspan="3">Actions</th>
+  </tr>
   <% @special_days.each do |special_day| %>
-    <%= render special_day %>
-    <p>
-      <%= link_to "Show this special day", special_day %>
-    </p>
+    <tr>
+      <td><%= special_day.day %></td>
+      <td><%= special_day.kind_name %></td>
+      <td><%= link_to "Edit", edit_special_day_url(special_day) %></td>
+      <td><%= button_to "Destroy", special_day, method: :delete %></td>
+    </tr>
   <% end %>
-</div>
+</table>
 
 <%= link_to "New special day", new_special_day_path %>
