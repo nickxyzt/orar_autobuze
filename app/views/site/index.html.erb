@@ -2,7 +2,58 @@
   <div class="alert alert-danger">ATENȚIE - programul afișat este pentru cursele din timpul săptămânii!<br>Dar lucrăm să implementăm și programul de weekend!</div>
 <% end %>
 
-<a href="https://6wk9a8b1.forms.app/my-blank-canvas" class="btn btn-primary btn-sm" target="_blank">Spune-ne ce crezi <i class="bi bi-arrow-right"></i></a>
+<div id="socialButtons">
+  <button id="addToHomeScreen" class="btn btn-danger btn-sm"><i class="bi bi-house-add-fill"></i></button>
+  <button id="whatsappShare" class="btn btn-success btn-sm"><i class="bi bi-whatsapp"></i></button>
+  <button id="facebookShare" class="btn btn-primary btn-sm"><i class="bi bi-facebook"></i></button>
+  <button id="twitterShare" class="btn btn-info btn-sm"><i class="bi bi-twitter-x"></i></button>
+  <a href="https://6wk9a8b1.forms.app/my-blank-canvas" class="btn btn-primary btn-sm" target="_blank">Părerea ta <i class="bi bi-emoji-smile"></i></a>
+</div>
+
+<script>
+  // Social Media buttons
+  const url = encodeURIComponent(window.location.href); // Get the current page URL
+  const text = encodeURIComponent("Orarul autobuzelor din Slobozia");
+  document.getElementById('whatsappShare').addEventListener('click', () => {
+    window.open(`https://wa.me/?text=${text} ${url}`, '_blank');
+  });
+  document.getElementById('facebookShare').addEventListener('click', () => {
+    window.open(`https://www.facebook.com/sharer/sharer.php?u=${url}`, '_blank');
+  });
+  document.getElementById('twitterShare').addEventListener('click', () => {
+    window.open(`https://twitter.com/intent/tweet?text=${text}&url=${url}`, '_blank');
+  });
+
+  // AddToHomeScreen button
+  let deferredPrompt;
+  window.addEventListener('beforeinstallprompt', (e) => {
+    // Prevent the default install prompt
+    e.preventDefault();
+    deferredPrompt = e;
+
+    // Show your custom prompt
+    const addButton = document.getElementById('addToHomeScreen');
+    addButton.style.display = 'block';
+
+    addButton.addEventListener('click', () => {
+      addButton.style.display = 'none'; // Hide custom UI
+
+      // Show the browser's install prompt
+      deferredPrompt.prompt();
+
+      // Wait for the user to respond to the prompt
+      deferredPrompt.userChoice.then((choiceResult) => {
+        if (choiceResult.outcome === 'accepted') {
+          console.log('User accepted the A2HS prompt');
+        } else {
+          console.log('User dismissed the A2HS prompt');
+        }
+        deferredPrompt = null;
+      });
+    });
+  });
+</script>
+
 <div class="row">
   <label for="line_id" class="form-label">Linia:</label>
 </div>
@@ -21,7 +72,7 @@
 <div class="table mb-0">
   <table class="table table-hover table-sm caption-top table-responsive mb-0">
     <tr>
-      <th class="text-center bg-success" style="position: sticky; top: 0; left: 0; z-index: 3; border: 0px;">Stație <i class="bi bi-bus-front"></i></th>
+      <th class="text-left bg-success" style="position: sticky; top: 0; left: 0; z-index: 3; border: 0px;">Stație <i class="bi bi-bus-front"></i></th>
       <th colspan="<%= @schedule.first.size %>" class="text-center bg-success" style="position: sticky; top: 0; z-index: 2; border-bottom: 0px;">Momente <i class="bi bi-clock-fill"></i></th>
     </tr>
   </table>
@@ -55,7 +106,7 @@
                   <%= station.name %>
                 <% end %>
               <% else %>
-                <button type="button" class="btn btn-outline-primary btn-sm py-0" data-bs-toggle="modal" data-bs-target="#modal_confirmare_stop" onclick="confirmation_modal(<%= @current_line.id %>, '<%= @current_line.name %>', <%= station.id %>, '<%= station.name %>')">
+                <button type="button" class="btn btn-outline-primary btn-sm py-0" data-bs-toggle="modal" data-bs-target="#modal_confirmare_stop" onclick="confirmation_modal(<%= @current_line.id %>, '<%= @current_line.name %>', <%= station.id %>, '<%= station.name %>', '<%= index_station == 0 ? "<b>PLECAT</b> din" : "<b>SOSIT</b> în" %>')">
                   <i class="bi bi-check-lg"></i> <%= station.name %>
                 </button>
               <% end %>
@@ -124,8 +175,8 @@
 
 <script>
   // afisare modal de confirmare
-  function confirmation_modal(line_id, line_name, station_id, station_name) {
-    document.getElementById("modal_body_content").innerHTML = 'Confirmi că autobuzul <b>' + line_name + '</b> tocmai a sosit în stația <b>' + station_name + '</b>?';
+  function confirmation_modal(line_id, line_name, station_id, station_name, kind) {
+    document.getElementById("modal_body_content").innerHTML = 'Confirmi că autobuzul <b>' + line_name + '</b> a ' + kind + ' stația <b>' + station_name + '</b>?';
     document.getElementById("modal_line_id").value = line_id;
     document.getElementById("modal_station_id").value = station_id;
   }
@@ -183,7 +234,7 @@
   // Scroll to table cell
   function scrollToCell()
   {
-    return nil;
+    return null;
     const row = 8; // Target row (1-based index)
     const col = 3; // Target column (1-based index)
 
