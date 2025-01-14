@@ -1,4 +1,5 @@
 class LinesController < ApplicationController
+
   before_action :set_line, only: %i[ show edit update destroy ]
 
   # GET /lines or /lines.json
@@ -21,7 +22,8 @@ class LinesController < ApplicationController
 
   # POST /lines or /lines.json
   def create
-    @line = Line.new(line_params)
+    times_table_hash = eval(params[:line][:times_table]).to_h
+    @line = Line.new(line_params.merge(times_table: times_table_hash))
 
     respond_to do |format|
       if @line.save
@@ -36,8 +38,9 @@ class LinesController < ApplicationController
 
   # PATCH/PUT /lines/1 or /lines/1.json
   def update
+    times_table_hash = eval(params[:line][:times_table]).to_h
     respond_to do |format|
-      if @line.update(line_params)
+      if @line.update(line_params.merge(times_table: times_table_hash))
         format.html { redirect_to lines_url, notice: "Line was successfully updated." }
         format.json { render :show, status: :ok, location: @line }
       else
@@ -65,10 +68,8 @@ class LinesController < ApplicationController
 
     # Only allow a list of trusted parameters through.
     def line_params
-      params.require(:line).permit(:name, :description, :station_list, :time_threshold, :start_times, :end_times).tap do |whitelisted|
+      params.require(:line).permit(:name, :description, :station_list, :time_threshold, :modified_at).tap do |whitelisted|
         whitelisted[:station_list] = whitelisted[:station_list].split(',').map(&:to_i)
-        whitelisted[:start_times] = whitelisted[:start_times].split(',').map {|elem| elem.strip}
-        whitelisted[:end_times] = whitelisted[:end_times].split(',').map {|elem| elem.strip}
       end
     end
 end

@@ -11,9 +11,10 @@ class SiteController < ApplicationController
 
     # ultimele confirmari pentru aceasta linie
     # luam in medie ultimele 10 valori pentru fiecare statie
-    stops = Stop.where(line_id: @current_line.id).
-      order('created_at DESC').
-      limit(@current_stations.size * 10 * @current_line.start_times.size).
+    stops = Stop.includes(:line).joins(:line).where(line_id: @current_line.id).
+      where('stops.created_at >= lines.modified_at').
+      order('stops.created_at DESC').
+      limit(@current_stations.size * 10 * @current_line.times_table[:weekdays][1][:start].size).
       map {|stop| [stop.station_id, Moment.new(stop.created_at.strftime("%H:%M"))]}
 
     # ultima confirmare venita de la user pentru linia curenta
@@ -37,10 +38,13 @@ class SiteController < ApplicationController
     @current_stations.each_with_index do |station, index_station|
       station_data = [] # adaugam un rand pentru statie
       # pentru fiecare cursa in parte, creare momente estimate
-      @current_line.start_times.each_with_index do |time_start, index_cursa|
-        # creare vector cu 3 elemente
-        start_t = Moment.new(@current_line.start_times[index_cursa])
-        end_t   = Moment.new(@current_line.end_times[index_cursa]) 
+      @current_line.times_table[:weekdays][1][:start].each_with_index do |time_start, index_cursa|
+        # Etapa I - cream Array-urile cu:
+        # - timpii estimati pe baza intregului traseu
+        # - timpii raportati in trecut de utilizatori si soferi (cu distanta threshold fata de timpii estimati)
+        # - timpii REALI raportati de soferi, sau in lipsa lor, de utilizatori
+        start_t = Moment.new(@current_line.times_table[:weekdays][1][:start][index_cursa])
+        end_t   = Moment.new(@current_line.times_table[:weekdays][1][:end][index_cursa])
         # durata intervalului unei curse intregi
         durata  = end_t.time - start_t.time
         # durata medie a unui interval
@@ -53,9 +57,13 @@ class SiteController < ApplicationController
           moment_estimat = end_t
         end
 
+        # Etapa II - corectam Array-ul timpilor estimati, pe baza:
+        # - matricii timpilor REALI, daca exista
+        # - matricii timpilor raportati (in trecut deci)
+
         # identificam inregistrarile pe aceasta linie care sunt in jurul momentului
         # folosim campul time_threshold
-        matched_stops = stops.select{|station_id, stop| station_id == station.id and (stop.time - moment_estimat.time).abs <= @current_line.time_threshold}.
+        matched_stops = stops.select{|station_id, stop| station_id == station.id and (stop.time >= start_t.time - 2) and (stop.time - moment_estimat.time).abs <= @current_line.time_threshold}.
           map {|elem| elem[1].time}
         moment_mediu = nil
         if matched_stops.size > 0
@@ -65,6 +73,7 @@ class SiteController < ApplicationController
         # ultimul moment confirmat al acestei curse
         moment_confirmat = media
 
+        # creare vector cu 3 elemente
         station_data << [moment_estimat.to_s, moment_mediu.to_s, moment_confirmat]
       end
       @schedule << station_data

@@ -22,6 +22,11 @@
   </div>
 
   <div>
+    <%= form.label :modified_at, style: "display: block" %>
+    <%= form.date_field :modified_at %>
+  </div>
+
+  <div>
     <%= form.label :time_threshold, style: "display: block" %>
     <%= form.text_field :time_threshold %>
   </div>
@@ -32,13 +37,8 @@
   </div>
 
   <div>
-    <%= form.label :start_times, style: "display: block" %>
-    <%= form.text_area :start_times, value: line.start_times.join(', ') %>
-  </div>
-
-  <div>
-    <%= form.label :end_times, style: "display: block" %>
-    <%= form.text_area :end_times, value: line.end_times.join(', ') %>
+    <%= form.label :times_table, style: "display: block" %>
+    <%= form.text_area :times_table, value: line.times_table %>
   </div>
 
   <div>

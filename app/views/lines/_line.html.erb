@@ -15,19 +15,18 @@
   </p>
 
   <p>
+    <strong>Modified At:</strong>
+    <%= line.modified_at %>
+  </p>
+
+  <p>
     <strong>Time threshold:</strong>
     <%= line.time_threshold %>
   </p>
 
-
   <p>
     <strong>Start times:</strong>
-    <%= line.start_times.join(', ') %>
-  </p>
-
-  <p>
-    <strong>End times:</strong>
-    <%= line.end_times.join(', ') %>
+    <%= line.times_table %>
   </p>
 
 </div>

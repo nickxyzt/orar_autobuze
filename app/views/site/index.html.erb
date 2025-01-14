@@ -2,6 +2,7 @@
   <div class="alert alert-danger">ATENȚIE - programul afișat este pentru cursele din timpul săptămânii!<br>Dar lucrăm să implementăm și programul de weekend!</div>
 <% end %>
 
+<a href="https://6wk9a8b1.forms.app/my-blank-canvas" class="btn btn-primary btn-sm" target="_blank">Spune-ne ce crezi <i class="bi bi-arrow-right"></i></a>
 <div class="row">
   <label for="line_id" class="form-label">Linia:</label>
 </div>
@@ -15,34 +16,38 @@
 </div>
 
 <div>
-  Orarul estimativ al autobuzelor din Slobozia<br>
-  pentru linia <%= @current_line.name %> <b><%= @current_line.description %></b><br>
-  pentru cursele din cursul săptămânii<br>
+  Orarul estimativ al autobuzelor din Slobozia începând cu data de: <%= @current_line.modified_at.strftime("%d-%m-%Y") %>
 </div>
-<div class="table-responsive bg-primary" style="max-height: 350px; overflow-y: auto; padding: 2px;">
+<div class="table mb-0">
+  <table class="table table-hover table-sm caption-top table-responsive mb-0">
+    <tr>
+      <th class="text-center bg-success" style="position: sticky; top: 0; left: 0; z-index: 3; border: 0px;">Stație <i class="bi bi-bus-front"></i></th>
+      <th colspan="<%= @schedule.first.size %>" class="text-center bg-success" style="position: sticky; top: 0; z-index: 2; border-bottom: 0px;">Momente <i class="bi bi-clock-fill"></i></th>
+    </tr>
+  </table>
+</div>
+
+<div class="table-responsive" style="max-height: 350px; overflow-y: auto;" id="div-table-responsive">
   <table class="table table-hover table-sm caption-top table-responsive mb-0" id="schedule-table">
-    <thead>
-      <tr>
-        <th class="border border-dark text-center" style="position: sticky; top: 0; left: 0; background: #f2f2f2; z-index: 3;">Stație <i class="bi bi-bus-front"></i></th>
-        <th colspan="<%= @schedule.first.size %>" class="text-center border border-dark" style="position: sticky; top: 0; background: #f2f2f2; z-index: 2;">Momente <i class="bi bi-clock-fill"></i></th>
-      </tr>
-    </thead>
-    <tbody class="table-group-divider">
+    <tbody>
       <% @schedule.size.times do |index_station| %>
         <% station = @current_stations[index_station] %>
-        <tr class="<%= "border-primary" if index_station == 0 %>">
+        <tr>
           <%# stilul pentru coloana cu statiile %>
           <% if index_station == 0 %>
-            <% style = "position: sticky; top: 30px; left: 0; background: #f2f2f2; z-index: 3;" %>
+            <% td_style = "position: sticky; top: 0px; left: 0; background: #f2f2f2; z-index: 3; border-bottom: 0px;" %>
+            <% td_class = "bg-warning" %>
           <% elsif index_station == @current_stations.size - 1 %>
-            <% style = "position: sticky; bottom: 0px; left: 0; background: #f2f2f2; z-index: 3;" %>
+            <% td_style = "position: sticky; bottom: 0px; left: 0; background: #f2f2f2; z-index: 3; border-bottom: 0px;" %>
+            <% td_class = "bg-warning" %>
           <% else %>
-            <% style = "position: sticky; left: 0; background: #fff; z-index: 1;" %>
+            <% td_style = "position: sticky; left: 0; background: #fff; z-index: 1;" %>
+            <% td_class = "" %>
           <% end %>
-          <td style="<%= style %>">
+          <td style="<%= td_style %>" class="<%= td_class %>">
             <% if Time.zone.now.on_weekend? %>
               <%= button_tag class: 'btn btn-success disabled btn-sm py-0' do %>
-                <%= station.name %>
+                <%= station.master_station.display_name %>
               <% end %>
             <% else %>
               <% if @last_station_confirmed_index and index_station <= @last_station_confirmed_index %>
@@ -57,15 +62,17 @@
             <% end %>
           </td>
           <% @schedule[index_station].size.times do |index_cursa| %>
-            <%# stilul pentru ore %>
+            <%# stilul pentru orele de sosire %>
+            <% td_style = "" %>
+            <% td_class = "" %>
             <% if index_station == 0 %>
-              <% style = "position: sticky; top: 30px; background-color: #e0e0e0; z-index: 2;" %>
+              <% td_style = "position: sticky; top: 0px; background-color: red; z-index: 2; border: 0px; font-weight: bold;" %>
+              <% td_class = "bg-warning" %>
             <% elsif index_station == @current_stations.size - 1 %>
-              <% style = "position: sticky; bottom: 0px; background-color: #e0e0e0; z-index: 2;" %>
-            <% else %>
-              <% style = "" %>
+              <% td_style = "position: sticky; bottom: 0px; background-color: red; z-index: 2; border: 0px; font-weight: bold;" %>
+              <% td_class = "bg-warning" %>
             <% end %>
-            <td class="text-center text-secondary" style ="<%= style %>">
+            <td class="text-center text-secondary <%= td_class %>" style ="<%= td_style %>">
               <% moment_estimat = @schedule[index_station][index_cursa][0] %>
               <% moment_confirmat = @schedule[index_station][index_cursa][1] %>
 
@@ -77,7 +84,8 @@
                 <% bs_title = moment_estimat %>
                 <% bs_content = "Calculat estimativ." %>
               <% end %>
-              <a tabindex="0" class="text-decoration-none <%= "fw-bold" if index_station == 0 or index_station == @current_stations.size - 1 %>" role="button" data-bs-toggle="popover" data-bs-trigger="focus" data-bs-title="<%= bs_title %>" data-bs-content="<%= bs_content %>">
+
+              <a tabindex="0" class="text-decoration-none" role="button" data-bs-toggle="popover" data-bs-trigger="focus" data-bs-title="<%= bs_title %>" data-bs-content="<%= bs_content %>">
                 <% unless moment_confirmat.blank? %>
                   <span class="text-success lead"><b><%= moment_confirmat %></b></span>
                 <% else %>
@@ -117,12 +125,12 @@
 <script>
   // afisare modal de confirmare
   function confirmation_modal(line_id, line_name, station_id, station_name) {
-    document.getElementById("modal_body_content").innerHTML = 'Confirmi că în acest moment linia <b>' + line_name + '</b> este în stația <b>' + station_name + '</b>?';
+    document.getElementById("modal_body_content").innerHTML = 'Confirmi că autobuzul <b>' + line_name + '</b> tocmai a sosit în stația <b>' + station_name + '</b>?';
     document.getElementById("modal_line_id").value = line_id;
     document.getElementById("modal_station_id").value = station_id;
   }
 
-  // pastram culoarea default (din variabila CSS)
+  // memoram culoarea default (din variabila CSS)
   if (typeof default_bg_color === 'undefined') {
     default_bg_color = getComputedStyle(document.querySelector(".table-hover tbody tr")).getPropertyValue('--bs-table-bg').trim();
   }
@@ -136,8 +144,10 @@
   }
 
   color_table();
+</script>
 
-  // Add click event listener to each row in the table body
+<script>
+  // Colorare rand si coloana pe celula selectata
   document.querySelectorAll(".table-hover tbody tr").forEach(row => {
     row.addEventListener("click", function(e){
       color_table();
@@ -157,7 +167,9 @@
       }
     });
   });
+</script>
 
+<script>
   // Initialize all popovers
   document.addEventListener('DOMContentLoaded', function () {
     var popoverTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="popover"]'));
@@ -165,11 +177,15 @@
       new bootstrap.Popover(popoverTriggerEl);
     });
   });
+</script>
 
+<script>
   // Scroll to table cell
-  document.addEventListener("DOMContentLoaded", () => {
+  function scrollToCell()
+  {
+    return nil;
     const row = 8; // Target row (1-based index)
-    const col = 25; // Target column (1-based index)
+    const col = 3; // Target column (1-based index)
 
     const table = document.getElementById("schedule-table");
     const cell = table.rows[row]?.cells[col];
@@ -177,6 +193,33 @@
     if (cell) {
       cell.scrollIntoView({ behavior: "smooth", block: "center", inline: "center" });
       cell.style.backgroundColor = "yellow";
+      cell.classList.add("bg-warning");
     }
-  });
+  }
+</script>
+
+<script>
+  // automatically update the height of schedule table
+  function updateMaxHeight() {
+    const table = document.getElementById('schedule-table');
+    const rect = table.getBoundingClientRect();
+    
+    // Distance from the top of the table to the top of the viewport
+    const distanceFromTop = rect.top;
+    
+    // Height of the viewport (browser window)
+    const windowHeight = window.innerHeight;
+
+    // Distance from the top of the table to the bottom of the screen
+    const distanceToBottom = windowHeight - distanceFromTop;
+    document.getElementById('div-table-responsive').style.maxHeight = '' + distanceToBottom + 'px';
+  }
+</script>
+
+<script>
+  // bindings
+  window.addEventListener('load', updateMaxHeight);
+  window.addEventListener('resize', updateMaxHeight);
+  window.addEventListener('load', scrollToCell);
+  window.addEventListener('resize', scrollToCell);
 </script>

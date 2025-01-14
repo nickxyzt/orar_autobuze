@@ -18,5 +18,8 @@ module OrarAutobuze
     #
     config.time_zone = "Europe/Bucharest"
     # config.eager_load_paths << Rails.root.join("extras")
+    
+    # Permitere salvare si Hash ca parametru!
+    config.active_record.use_yaml_unsafe_load = true
   end
 end
