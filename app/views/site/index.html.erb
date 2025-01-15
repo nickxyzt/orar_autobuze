@@ -2,57 +2,17 @@
   <div class="alert alert-danger">ATENȚIE - programul afișat este pentru cursele din timpul săptămânii!<br>Dar lucrăm să implementăm și programul de weekend!</div>
 <% end %>
 
-<div id="socialButtons">
-  <button id="addToHomeScreen" class="btn btn-danger btn-sm"><i class="bi bi-house-add-fill"></i></button>
-  <button id="whatsappShare" class="btn btn-success btn-sm"><i class="bi bi-whatsapp"></i></button>
-  <button id="facebookShare" class="btn btn-primary btn-sm"><i class="bi bi-facebook"></i></button>
-  <button id="twitterShare" class="btn btn-info btn-sm"><i class="bi bi-twitter-x"></i></button>
-  <a href="https://6wk9a8b1.forms.app/my-blank-canvas" class="btn btn-primary btn-sm" target="_blank">Părerea ta <i class="bi bi-emoji-smile"></i></a>
-</div>
-
 <script>
-  // Social Media buttons
-  const url = encodeURIComponent(window.location.href); // Get the current page URL
-  const text = encodeURIComponent("Orarul autobuzelor din Slobozia");
-  document.getElementById('whatsappShare').addEventListener('click', () => {
-    window.open(`https://wa.me/?text=${text} ${url}`, '_blank');
-  });
-  document.getElementById('facebookShare').addEventListener('click', () => {
-    window.open(`https://www.facebook.com/sharer/sharer.php?u=${url}`, '_blank');
-  });
-  document.getElementById('twitterShare').addEventListener('click', () => {
-    window.open(`https://twitter.com/intent/tweet?text=${text}&url=${url}`, '_blank');
-  });
-
-  // AddToHomeScreen button
-  let deferredPrompt;
-  window.addEventListener('beforeinstallprompt', (e) => {
-    // Prevent the default install prompt
-    e.preventDefault();
-    deferredPrompt = e;
-
-    // Show your custom prompt
-    const addButton = document.getElementById('addToHomeScreen');
-    addButton.style.display = 'block';
-
-    addButton.addEventListener('click', () => {
-      addButton.style.display = 'none'; // Hide custom UI
-
-      // Show the browser's install prompt
-      deferredPrompt.prompt();
-
-      // Wait for the user to respond to the prompt
-      deferredPrompt.userChoice.then((choiceResult) => {
-        if (choiceResult.outcome === 'accepted') {
-          console.log('User accepted the A2HS prompt');
-        } else {
-          console.log('User dismissed the A2HS prompt');
-        }
-        deferredPrompt = null;
-      });
-    });
-  });
+  let show_modal = true;
 </script>
+
+<div id="socialButtons">
+  <button id="addToHomeScreen" class="btn btn-primary btn-sm" style="display: none;"><i class="bi bi-download"></i></button>
+  <button id="whatsappShare" class="btn btn-outline-success btn-sm"><i class="bi bi-whatsapp"></i></button>
+  <button id="facebookShare" class="btn btn-outline-primary btn-sm"><i class="bi bi-facebook"></i></button>
+  <button id="twitterShare" class="btn btn-outline-info btn-sm"><i class="bi bi-twitter-x"></i></button>
+  <a href="https://6wk9a8b1.forms.app/my-blank-canvas" class="btn btn-outline-primary btn-sm" target="_blank">Părerea ta <i class="bi bi-emoji-smile"></i></a>
+</div>
 
 <div class="row">
   <label for="line_id" class="form-label">Linia:</label>
@@ -151,7 +111,7 @@
   </table>
 </div>
 
-<!-- Modal -->
+<%# modal confirmare oprire autobuz %>
 <div class="modal fade" id="modal_confirmare_stop" tabindex="-1" aria-labelledby="confirmationModalLabel" aria-hidden="true">
   <div class="modal-dialog">
     <div class="modal-content">
@@ -168,6 +128,23 @@
           <%= hidden_field_tag :modal_station_id %>
           <button type="submit" class="btn btn-primary">Da, confirm! <i class="bi bi-check-circle-fill"></i></button>
         <% end %>
+      </div>
+    </div>
+  </div>
+</div>
+
+<%# modal instalare aplicatie %>
+<div class="modal fade" id="modal_install_app" tabindex="-1" aria-labelledby="installModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h1 class="modal-title fs-5" id="installModalLabel">Dorești să instalezi aplicația noastră?</h1>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">Instalează aplicația și bucură-te de toate avantajele!</div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#modal_install_app"><i class="bi bi-x-circle"></i> Nu încă</button>
+        <button type="button" id="btn_install_app" class="btn btn-primary"><i class="bi bi-check-circle"></i> Sigur că DA!</button>
       </div>
     </div>
   </div>
@@ -198,6 +175,7 @@
 </script>
 
 <script>
+  // ***** Functii utilitare pentru tabel *****
   // Colorare rand si coloana pe celula selectata
   document.querySelectorAll(".table-hover tbody tr").forEach(row => {
     row.addEventListener("click", function(e){
@@ -218,19 +196,7 @@
       }
     });
   });
-</script>
 
-<script>
-  // Initialize all popovers
-  document.addEventListener('DOMContentLoaded', function () {
-    var popoverTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="popover"]'));
-    popoverTriggerList.forEach(function (popoverTriggerEl) {
-      new bootstrap.Popover(popoverTriggerEl);
-    });
-  });
-</script>
-
-<script>
   // Scroll to table cell
   function scrollToCell()
   {
@@ -247,9 +213,7 @@
       cell.classList.add("bg-warning");
     }
   }
-</script>
 
-<script>
   // automatically update the height of schedule table
   function updateMaxHeight() {
     const table = document.getElementById('schedule-table');
@@ -273,4 +237,92 @@
   window.addEventListener('resize', updateMaxHeight);
   window.addEventListener('load', scrollToCell);
   window.addEventListener('resize', scrollToCell);
+
+  // Bootstrap - initialize all popovers
+  document.addEventListener('DOMContentLoaded', function () {
+    var popoverTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="popover"]'));
+    popoverTriggerList.forEach(function (popoverTriggerEl) {
+      new bootstrap.Popover(popoverTriggerEl);
+    });
+  });
+
+  // Social Media buttons
+  const url = encodeURIComponent(window.location.href); // Get the current page URL
+  const text = encodeURIComponent("Orarul autobuzelor din Slobozia");
+  document.getElementById('whatsappShare').addEventListener('click', () => {
+    window.open(`https://wa.me/?text=${text} ${url}`, '_blank');
+  });
+  document.getElementById('facebookShare').addEventListener('click', () => {
+    window.open(`https://www.facebook.com/sharer/sharer.php?u=${url}`, '_blank');
+  });
+  document.getElementById('twitterShare').addEventListener('click', () => {
+    window.open(`https://twitter.com/intent/tweet?text=${text}&url=${url}`, '_blank');
+  });
+</script>
+
+<script>
+  // *********************************************
+  // toata logica pentru instalarea aplicatiei PWA
+
+  let deferredPrompt;
+  let app_is_installed = true;
+  let modal_install; // modalul de invitare la instalare
+
+  document.addEventListener('DOMContentLoaded', function() {
+    // Pornim executia dupa un timp scurt de la pornire 
+    // (sa avem variabila "app_is_installed" setata de "beforeinstallprompt")
+    setTimeout(function() {
+      if (!app_is_installed)
+      {
+        addButton = document.getElementById('addToHomeScreen');
+        addButton.style.display = "inline";
+        modal_install = new bootstrap.Modal(document.getElementById('modal_install_app'));
+        modal_install.show();
+      }
+      else
+      {
+        // Daca aplicatia e instalata, dar ruleaza in browser
+        if (window.matchMedia('(display-mode: standalone)').matches == false)
+          // daca NU suntem in Safari
+          if (navigator.standalone == undefined)
+            alert('Rulezi in browser, desi ai aplicatia instalata! Modal de alegere.');
+          else
+            // daca suntem in Safari
+            if (navigator.standalone == false)
+              alert('Rulezi in browser, vezi instructiuni de instalare!');
+      }
+    }, 100);
+  });
+
+  // Daca app NU e instalata, sub Android sau Chrome pe desktop acest eveniment va fi lansat
+  // Evenimentul apare atat la intrarea pe pagina, cat si dupa ce userul da "cancel" in promptul de instalare
+  window.addEventListener('beforeinstallprompt', (e) => {
+    app_is_installed = false; // daca acest eveniment se lanseaza, aplicatia nu e instalata
+    e.preventDefault(); // Prevent the default behaviour of whatever browser and OS
+    deferredPrompt = e; // prompt-ul de instalare aplicatie
+
+    // E necesar ca userul sa interactioneze intai cu un buton
+    // pentru a-i aparea promptul de instalare - asa functioneaza PWA
+    addButton = document.getElementById('btn_install_app');
+
+    // Leaga buttonul sa deschida promptul de instalare
+    addButton.addEventListener('click', () => {
+      // Abia dupa ce userul da click, putem sa ii afisam promptul de instalare
+      deferredPrompt.prompt();
+      modal_install.hide();
+    });
+  });
+
+  // Dupa instalare, se ruleaza acest eveniment
+  window.addEventListener('appinstalled', () => {
+    addButton = document.getElementById('addToHomeScreen');
+    addButton.style.display = "none";
+  });
+
+  // Butonul de "download" manual al aplicatiei
+  addButton = document.getElementById('addToHomeScreen');
+  addButton.addEventListener('click', () => {
+    modal_install.show(); // Show the modal
+  });
+  // *********************************************
 </script>
