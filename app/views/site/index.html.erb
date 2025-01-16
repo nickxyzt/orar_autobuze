@@ -255,23 +255,22 @@
       if (!app_is_installed)
       {
         // afisam butonul de "descarcare"
-        if (isPureChrome())
-        {
-          addButton = document.getElementById('addToHomeScreen');
-          addButton.style.display = "inline";
-        }
+        addButton = document.getElementById('addToHomeScreen');
+        addButton.style.display = "inline";
 
-        // in functie de Chrome/Safari afisam un modal sau altul
-        if (navigator.standalone === false) // Safari
-        {
-          if (isSafariMobile())
-            modal_info_safari_mobile.show();
-          if (isSafariMac())
-            modal_info_safari_mac.show();
-        }
-        else 
-          if (isPureChrome()) // Chrome Android si Chrome for desktop
-            modal_install.show();
+        // in functie de platforma, afisam unul din cele 3 modaluri
+        // (el este deja asignat pe unul din modaluri)
+        if (isPureChrome())
+          modal_install.show();
+        else
+          // in functie de Chrome/Safari afisam un modal sau altul
+          if (navigator.standalone === false) // Safari
+          {
+            if (isSafariMobile())
+              modal_info_safari_mobile.show();
+            if (isSafariMac())
+              modal_info_safari_mac.show();
+          }
       }
       else
       {
