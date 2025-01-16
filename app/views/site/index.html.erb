@@ -2,10 +2,6 @@
   <div class="alert alert-danger">ATENȚIE - programul afișat este pentru cursele din timpul săptămânii!<br>Dar lucrăm să implementăm și programul de weekend!</div>
 <% end %>
 
-<script>
-  let show_modal = true;
-</script>
-
 <div id="socialButtons">
   <button id="addToHomeScreen" class="btn btn-primary btn-sm" style="display: none;"><i class="bi bi-download"></i></button>
   <button id="whatsappShare" class="btn btn-outline-success btn-sm"><i class="bi bi-whatsapp"></i></button>
@@ -21,7 +17,7 @@
   <div class="col col-8 col-md-5">
     <%= form_tag :site_change_current_line do |form| %>
       <%= select_tag :line_id, options_for_select(Line.order(:name).map {|line| ["#{line.name} #{line.description}", line.id]}, @current_line.id),
-                  class: 'form-select', onchange: 'this.form.submit()' %>
+        class: 'form-select', onchange: 'this.form.submit()' %>
     <% end %>
   </div>
 </div>
@@ -133,6 +129,11 @@
   </div>
 </div>
 
+
+<% ######################################################### %>
+<% # MODALELE DE INSTALARE SI INFORMARE %>
+<% # IMPREUNA CU JAVASCRIPT %>
+
 <%# modal instalare aplicatie %>
 <div class="modal fade" id="modal_install_app" tabindex="-1" aria-labelledby="installModalLabel" aria-hidden="true">
   <div class="modal-dialog">
@@ -149,6 +150,183 @@
     </div>
   </div>
 </div>
+
+<%# modal informare ca aplicatia e deja instalata %>
+<div class="modal fade" id="modal_info_installed_app" tabindex="-1" aria-labelledby="infoInstalledModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h1 class="modal-title fs-5" id="infoInstalledModalLabel">Ai instalat deja aplicația</h1>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">Se pare că <b>ai instalat</b> deja aplicația noastră, dar acum ești în browser. Experiența ta este mai plăcută <b>direct în aplicație</b>.</div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modal_info_installed_app"><i class="bi bi-hand-thumbs-up-fill"></i> Am înțeles!</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<%# modal instructiuni Safari sub iPhone %>
+<div class="modal fade" id="modal_info_safari_mobile" tabindex="-1" aria-labelledby="safariMobileModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h1 class="modal-title fs-5" id="safariMobileModalLabel">Dorești să instalezi aplicația noastră?</h1>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        Instalează aplicația și bucură-te de toate avantajele!
+        <ol>
+          <li>Atinge butonul <strong>Share</strong> (<i class="bi bi-box-arrow-up"></i>) din bara de navigare a Safari.</li>
+          <li>Selectează opțiunea <strong>Adaugă pe ecranul principal.</strong></li>
+        </ol>
+        Apoi o vei putea folosi direct de pe ecranul principal.
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modal_info_safari_mobile"><i class="bi bi-hand-thumbs-up-fill"></i> OK!</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<%# modal instructiuni Safari sub macOS %>
+<div class="modal fade" id="modal_info_safari_mac" tabindex="-1" aria-labelledby="safariMacModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h1 class="modal-title fs-5" id="safariMacModalLabel">Dorești să instalezi aplicația noastră?</h1>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <p>Instalează aplicația și bucură-te de toate avantajele!<br />Iată cum trebuie să faci:</p>
+        <ol>
+          <li>În bara de meniu Safari din colțul stânga-sus, selectează <strong>Fișier</strong> și apoi <strong>Adaugă în Dock.</strong></li>
+          <li>După instalare, aplicația va apărea apoi în Dock-ul tău și o vei putea deschide direct.</li>
+        </ol>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modal_info_safari_mac"><i class="bi bi-hand-thumbs-up-fill"></i> OK!</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // toata logica pentru instalarea aplicatiei PWA
+  // Detectare daca este instalata: pornim de la premisa ca este
+  // si invalidam daca pe Android se ruleaza beforeinstallprompt
+  // Dupa un timp scurt verificam daca Safari raporteaza ca nu e instalata
+  // Apoi, in functie de situatie, aratam unul din cele 4 modale Bootstrap
+  // ATENTIE - totul se face exact pe browserele dorite (whitelist!)
+
+  let deferredPrompt; // promptul de instalare care apare pe Chrome
+  let app_is_installed = true; // pornim de la aceasta premisa, neaparat!
+  // modalul de invitare la instalare
+  let modal_install             = new bootstrap.Modal(document.getElementById('modal_install_app'));
+  let modal_info_safari_mobile  = new bootstrap.Modal(document.getElementById('modal_info_safari_mobile'));
+  let modal_info_safari_mac     = new bootstrap.Modal(document.getElementById('modal_info_safari_mac'));
+  let modal_info_installed_app  = new bootstrap.Modal(document.getElementById('modal_info_installed_app'));
+
+  function isSafariMobile() {
+    const userAgent = navigator.userAgent;
+    return /iPhone|iPad|iPod/.test(userAgent) && /Safari/.test(userAgent) && !/CriOS/.test(userAgent) && !/FxiOS/.test(userAgent);
+  }
+
+  function isSafariMac() {
+    const userAgent = navigator.userAgent;
+    return /Macintosh/.test(userAgent) && /Safari/.test(userAgent) && !/CriOS/.test(userAgent) && !/FxiOS/.test(userAgent);
+  }
+
+  function isPureChrome() {
+    const userAgent = navigator.userAgent;
+    const vendor = navigator.vendor;
+    // Check for "Google Inc." as the vendor and ensure it's Chrome but not Chromium-based alternatives
+    return /Chrome/.test(userAgent) && /Google Inc/.test(vendor) && !/Edg|OPR|Brave|SamsungBrowser/.test(userAgent);
+  }
+
+  document.addEventListener('DOMContentLoaded', function() {
+    // Pornim executia dupa un timp scurt de la pornire 
+    // (sa avem variabila "app_is_installed" setata de "beforeinstallprompt")
+    setTimeout(function() {
+      // verificam daca suntem pe Safari si (nu este instalata SAU suntem in browser)
+      // Safari NU are o metoda de a verifica daca aplicatia e instalata daca nu suntem in ea!
+      // (verificarea pe Android se face automat prin evenimentul beforeinstallprompt)
+      if ((isSafariMobile() || isSafariMac()) && navigator.standalone === false) {
+        app_is_installed = false;
+      }
+
+      if (!app_is_installed)
+      {
+        // afisam butonul de "descarcare"
+        if (isPureChrome())
+        {
+          addButton = document.getElementById('addToHomeScreen');
+          addButton.style.display = "inline";
+        }
+
+        // in functie de Chrome/Safari afisam un modal sau altul
+        if (navigator.standalone === false) // Safari
+        {
+          if (isSafariMobile())
+            modal_info_safari_mobile.show();
+          if (isSafariMac())
+            modal_info_safari_mac.show();
+        }
+        else 
+          if (isPureChrome()) // Chrome Android si Chrome for desktop
+            modal_install.show();
+      }
+      else
+      {
+        // Daca (aplicatia e instalata si suntem in Chrome)
+        if (window.matchMedia('(display-mode: standalone)').matches == false && isPureChrome())
+          modal_info_installed_app.show();
+      }
+    }, 2000);
+  });
+
+  // Daca app NU e instalata, sub Android sau Chrome pe desktop, acest eveniment va fi lansat
+  // Evenimentul apare atat la intrarea pe pagina, cat si dupa ce userul da "cancel" in promptul de instalare
+  window.addEventListener('beforeinstallprompt', (e) => {
+    if (isPureChrome())
+    {
+      app_is_installed = false; // daca acest eveniment se lanseaza, aplicatia nu e instalata
+      // Prevent the default behaviour of whatever browser and OS,
+      // altfel se va intampla doar atat: apare promptul prima data dupa un gest,
+      // apoi intervine perioada de "cooldown" de cateva zile
+      e.preventDefault(); 
+      deferredPrompt = e; // prompt-ul de instalare aplicatie
+
+      // E necesar ca userul sa interactioneze intai cu un buton
+      // pentru a-i putea aparea promptul de instalare - asa functioneaza PWA
+      // Abia aici legam buttonul sa deschida promptul de instalare
+      addButton = document.getElementById('btn_install_app');
+      addButton.addEventListener('click', () => {
+        deferredPrompt.prompt();
+        modal_install.hide();
+      });
+    }
+  });
+
+  // Dupa instalare, se ruleaza acest eveniment, si ascundem butonul
+  window.addEventListener('appinstalled', () => {
+    addButton = document.getElementById('addToHomeScreen');
+    addButton.style.display = "none";
+  });
+
+  // Butonul de "download" manual al aplicatiei
+  addButton = document.getElementById('addToHomeScreen');
+  addButton.addEventListener('click', () => {
+    if (isPureChrome())
+      modal_install.show(); // Show the modal inviting the user to install
+    if (isSafariMobile())
+      modal_info_safari_mobile.show(); // Show the modal with info
+    if (isSafariMac())
+      modal_info_safari_mac.show(); // Show the modal with info
+  });
+</script>
+<% ######################################################### %>
 
 <script>
   // afisare modal de confirmare
@@ -260,69 +438,3 @@
   });
 </script>
 
-<script>
-  // *********************************************
-  // toata logica pentru instalarea aplicatiei PWA
-
-  let deferredPrompt;
-  let app_is_installed = true;
-  let modal_install; // modalul de invitare la instalare
-
-  document.addEventListener('DOMContentLoaded', function() {
-    // Pornim executia dupa un timp scurt de la pornire 
-    // (sa avem variabila "app_is_installed" setata de "beforeinstallprompt")
-    setTimeout(function() {
-      if (!app_is_installed)
-      {
-        addButton = document.getElementById('addToHomeScreen');
-        addButton.style.display = "inline";
-        modal_install = new bootstrap.Modal(document.getElementById('modal_install_app'));
-        modal_install.show();
-      }
-      else
-      {
-        // Daca aplicatia e instalata, dar ruleaza in browser
-        if (window.matchMedia('(display-mode: standalone)').matches == false)
-          // daca NU suntem in Safari
-          if (navigator.standalone == undefined)
-            alert('Rulezi in browser, desi ai aplicatia instalata! Modal de alegere.');
-          else
-            // daca suntem in Safari
-            if (navigator.standalone == false)
-              alert('Rulezi in browser, vezi instructiuni de instalare!');
-      }
-    }, 100);
-  });
-
-  // Daca app NU e instalata, sub Android sau Chrome pe desktop acest eveniment va fi lansat
-  // Evenimentul apare atat la intrarea pe pagina, cat si dupa ce userul da "cancel" in promptul de instalare
-  window.addEventListener('beforeinstallprompt', (e) => {
-    app_is_installed = false; // daca acest eveniment se lanseaza, aplicatia nu e instalata
-    e.preventDefault(); // Prevent the default behaviour of whatever browser and OS
-    deferredPrompt = e; // prompt-ul de instalare aplicatie
-
-    // E necesar ca userul sa interactioneze intai cu un buton
-    // pentru a-i aparea promptul de instalare - asa functioneaza PWA
-    addButton = document.getElementById('btn_install_app');
-
-    // Leaga buttonul sa deschida promptul de instalare
-    addButton.addEventListener('click', () => {
-      // Abia dupa ce userul da click, putem sa ii afisam promptul de instalare
-      deferredPrompt.prompt();
-      modal_install.hide();
-    });
-  });
-
-  // Dupa instalare, se ruleaza acest eveniment
-  window.addEventListener('appinstalled', () => {
-    addButton = document.getElementById('addToHomeScreen');
-    addButton.style.display = "none";
-  });
-
-  // Butonul de "download" manual al aplicatiei
-  addButton = document.getElementById('addToHomeScreen');
-  addButton.addEventListener('click', () => {
-    modal_install.show(); // Show the modal
-  });
-  // *********************************************
-</script>
