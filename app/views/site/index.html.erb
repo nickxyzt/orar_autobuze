@@ -229,8 +229,7 @@
   let modal_info_installed_app  = new bootstrap.Modal(document.getElementById('modal_info_installed_app'));
 
   function isSafariMobile() {
-    const userAgent = navigator.userAgent;
-    return /iPhone|iPad|iPod/.test(userAgent) && /Safari/.test(userAgent) && !/CriOS/.test(userAgent) && !/FxiOS/.test(userAgent);
+    return <%= browser.safari? %>;
   }
 
   function isSafariMac() {
@@ -239,10 +238,7 @@
   }
 
   function isPureChrome() {
-    const userAgent = navigator.userAgent;
-    const vendor = navigator.vendor;
-    // Check for "Google Inc." as the vendor and ensure it's Chrome but not Chromium-based alternatives
-    return /Chrome/.test(userAgent) && /Google Inc/.test(vendor) && !/Edg|OPR|Brave|SamsungBrowser/.test(userAgent);
+    return <%= browser.chrome? %>;
   }
 
   document.addEventListener('DOMContentLoaded', function() {
