@@ -260,7 +260,6 @@
 
         // in functie de platforma, afisam unul din cele 3 modaluri
         // (el este deja asignat pe unul din modaluri)
-        <% byebug %>
         <% if Time.zone.now >= session[:user_config_next_reminder] %>
           if (isPureChrome())
             modal_install.show();
