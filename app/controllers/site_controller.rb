@@ -2,6 +2,11 @@ class SiteController < ApplicationController
   skip_before_action :verify_authenticity_token
 
   def index
+    # Pastram in sesiune daca a instalat PWA
+    if params[:pwa]
+      session[:pwa] = true
+    end
+
     unless session[:line_id]
       @current_line = Line.first
     else

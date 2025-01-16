@@ -263,22 +263,22 @@
         if (isPureChrome())
           modal_install.show();
         else
-          // in functie de Chrome/Safari afisam un modal sau altul
           if (navigator.standalone === false) // Safari
           {
             if (isSafariMobile())
               modal_info_safari_mobile.show();
-            if (isSafariMac())
-              modal_info_safari_mac.show();
+            else
+              if (isSafariMac())
+                modal_info_safari_mac.show();
           }
       }
       else
       {
         // Daca (aplicatia e instalata si suntem in Chrome)
-        if (window.matchMedia('(display-mode: standalone)').matches == false && isPureChrome())
-          modal_info_installed_app.show();
+        // if (window.matchMedia('(display-mode: standalone)').matches == false && isPureChrome())
+        //   modal_info_installed_app.show();
       }
-    }, 2000);
+    }, 1000);
   });
 
   // Daca app NU e instalata, sub Android sau Chrome pe desktop, acest eveniment va fi lansat
@@ -308,6 +308,7 @@
   window.addEventListener('appinstalled', () => {
     addButton = document.getElementById('addToHomeScreen');
     addButton.style.display = "none";
+    app_is_installed = true;
   });
 
   // Butonul de "download" manual al aplicatiei

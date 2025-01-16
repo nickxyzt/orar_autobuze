@@ -1,7 +1,7 @@
 {
   "name": "Slobozia mea",
   "short_name": "Slobozia mea",
-  "start_url": "/",
+  "start_url": "/?pwa=true",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#0000ff",
