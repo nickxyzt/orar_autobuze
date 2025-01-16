@@ -144,7 +144,7 @@
       </div>
       <div class="modal-body">Instalează aplicația și bucură-te de toate avantajele!</div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#modal_install_app"><i class="bi bi-x-circle"></i> Nu încă</button>
+        <button type="button" class="btn btn-secondary btn-dismiss" data-bs-toggle="modal" data-bs-target="#modal_install_app"><i class="bi bi-x-circle"></i> Nu încă</button>
         <button type="button" id="btn_install_app" class="btn btn-primary"><i class="bi bi-check-circle"></i> Sigur că DA!</button>
       </div>
     </div>
@@ -161,7 +161,7 @@
       </div>
       <div class="modal-body">Se pare că <b>ai instalat</b> deja aplicația noastră, dar acum ești în browser. Experiența ta este mai plăcută <b>direct în aplicație</b>.</div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modal_info_installed_app"><i class="bi bi-hand-thumbs-up-fill"></i> Am înțeles!</button>
+        <button type="button" class="btn btn-primary btn-dismiss" data-bs-toggle="modal" data-bs-target="#modal_info_installed_app"><i class="bi bi-hand-thumbs-up-fill"></i> Am înțeles!</button>
       </div>
     </div>
   </div>
@@ -184,7 +184,7 @@
         Apoi o vei putea folosi direct de pe ecranul principal.
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modal_info_safari_mobile"><i class="bi bi-hand-thumbs-up-fill"></i> OK!</button>
+        <button type="button" class="btn btn-primary btn-dismiss" data-bs-toggle="modal" data-bs-target="#modal_info_safari_mobile"><i class="bi bi-hand-thumbs-up-fill"></i> OK!</button>
       </div>
     </div>
   </div>
@@ -206,7 +206,7 @@
         </ol>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modal_info_safari_mac"><i class="bi bi-hand-thumbs-up-fill"></i> OK!</button>
+        <button type="button" class="btn btn-primary btn-dismiss" data-bs-toggle="modal" data-bs-target="#modal_info_safari_mac"><i class="bi bi-hand-thumbs-up-fill"></i> OK!</button>
       </div>
     </div>
   </div>
@@ -260,17 +260,20 @@
 
         // in functie de platforma, afisam unul din cele 3 modaluri
         // (el este deja asignat pe unul din modaluri)
-        if (isPureChrome())
-          modal_install.show();
-        else
-          if (navigator.standalone === false) // Safari
-          {
-            if (isSafariMobile())
-              modal_info_safari_mobile.show();
-            else
-              if (isSafariMac())
-                modal_info_safari_mac.show();
-          }
+        <% byebug %>
+        <% if Time.zone.now >= session[:user_config_next_reminder] %>
+          if (isPureChrome())
+            modal_install.show();
+          else
+            if (navigator.standalone === false) // Safari
+            {
+              if (isSafariMobile())
+                modal_info_safari_mobile.show();
+              else
+                if (isSafariMac())
+                  modal_info_safari_mac.show();
+            }
+        <% end %>
       }
       else
       {
@@ -320,6 +323,15 @@
       modal_info_safari_mobile.show(); // Show the modal with info
     if (isSafariMac())
       modal_info_safari_mac.show(); // Show the modal with info
+  });
+
+  // Butoanele de inchidere modaluri (le consideram "dismiss")
+  document.querySelectorAll('.btn-dismiss').forEach(button => {
+    button.addEventListener('click', () => {
+      const url = '/site/dismiss_button'; // Retrieve the URL from the data attribute
+      // Make a background request
+      fetch(url);
+    });
   });
 </script>
 <% ######################################################### %>
