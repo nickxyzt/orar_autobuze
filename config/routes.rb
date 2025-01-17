@@ -1,6 +1,7 @@
 Rails.application.routes.draw do
   get 'site/index'
   get 'site/dismiss_button'
+  get '/pwa', to: 'site#index', defaults: { pwa_mode: 'pwa' }
   post 'site/change_current_line'
   post 'site/confirm_stop'
 

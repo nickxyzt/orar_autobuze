@@ -202,6 +202,7 @@
         <p>Instalează aplicația și bucură-te de toate avantajele!<br />Iată cum trebuie să faci:</p>
         <ol>
           <li>În bara de meniu Safari din colțul stânga-sus, selectează <strong>Fișier</strong> și apoi <strong>Adaugă în Dock.</strong></li>
+          <li>Alternativ, poți atinge butonul <strong>Share</strong> (<i class="bi bi-box-arrow-up"></i>) din bara de navigare a Safari și apoi <strong>Adaugă în Dock.</strong></li>
           <li>După instalare, aplicația va apărea apoi în Dock-ul tău și o vei putea deschide direct.</li>
         </ol>
       </div>
@@ -259,6 +260,7 @@
         addButton.style.display = "inline";
         if (<%= session[:app_was_installed] == true %>)
           <%# Chrome sub Android mai vechi raporteaza incorect aplicatia ca nefiind instalata... %>
+          <%# pana la accesarea PWA instalate, nici macar nu o raporteaza ca instalata... %>
           addButton.style.display = "none";
 
         <%# in functie de platforma, afisam unul din cele 3 modaluri %>
@@ -283,11 +285,12 @@
         //if (window.matchMedia('(display-mode: standalone)').matches == false && isPureChrome())
         //  modal_info_installed_app.show();
       }
-    }, 1000);
+    }, 1500);
   });
 
   <%# Daca app NU e instalata, sub Android sau Chrome pe desktop, acest eveniment va fi lansat %>
   <%# Evenimentul apare atat la intrarea pe pagina, cat si dupa ce userul da "cancel" in promptul de instalare %>
+  <%# ATENTIE - Chrome pe Android vechi, pana la accesarea PWA instalate, evenimentul va tot rula... %>
   window.addEventListener('beforeinstallprompt', (e) => {
     if (isPureChrome())
     {
