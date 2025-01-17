@@ -32,13 +32,16 @@ class SiteController < ApplicationController
       @current_line = Line.find(session[:line_id])
     end
     @current_stations = @current_line.stations
+    today_kind_id = SpecialDay.kind_id_of(Date.today)
+    today_kind_name = SpecialDay.new(kind_id: today_kind_id).kind_name
+    @today_kind_long_name = SpecialDay.new(kind_id: today_kind_id).kind_long_name
 
     # ultimele confirmari pentru aceasta linie
     # luam in medie ultimele 10 valori pentru fiecare statie
     stops = Stop.includes(:line).joins(:line).where(line_id: @current_line.id).
       where('stops.created_at >= lines.modified_at').
       order('stops.created_at DESC').
-      limit(@current_stations.size * 10 * @current_line.times_table[:weekdays][1][:start].size).
+      limit(@current_stations.size * 10 * @current_line.times_table[today_kind_name][1][:start].size).
       map {|stop| [stop.station_id, Moment.new(stop.created_at.strftime("%H:%M"))]}
 
     # ultima confirmare venita de la user pentru linia curenta
@@ -62,13 +65,13 @@ class SiteController < ApplicationController
     @current_stations.each_with_index do |station, index_station|
       station_data = [] # adaugam un rand pentru statie
       # pentru fiecare cursa in parte, creare momente estimate
-      @current_line.times_table[:weekdays][1][:start].each_with_index do |time_start, index_cursa|
+      @current_line.times_table[today_kind_name][1][:start].each_with_index do |time_start, index_cursa|
         # Etapa I - cream Array-urile cu:
         # - timpii estimati pe baza intregului traseu
         # - timpii raportati in trecut de utilizatori si soferi (cu distanta threshold fata de timpii estimati)
         # - timpii REALI raportati de soferi, sau in lipsa lor, de utilizatori
-        start_t = Moment.new(@current_line.times_table[:weekdays][1][:start][index_cursa])
-        end_t   = Moment.new(@current_line.times_table[:weekdays][1][:end][index_cursa])
+        start_t = Moment.new(@current_line.times_table[today_kind_name][1][:start][index_cursa])
+        end_t   = Moment.new(@current_line.times_table[today_kind_name][1][:end][index_cursa])
         # durata intervalului unei curse intregi
         durata  = end_t.time - start_t.time
         # durata medie a unui interval

@@ -10,11 +10,8 @@
   <a href="https://6wk9a8b1.forms.app/my-blank-canvas" class="btn btn-outline-primary btn-sm" target="_blank">Părerea ta <i class="bi bi-emoji-smile"></i></a>
 </div>
 
-<div class="row">
-  <label for="line_id" class="form-label">Linia:</label>
-</div>
 <div class="row d-flex align-items-end">
-  <div class="col col-8 col-md-5">
+  <div class="col col-8">
     <%= form_tag :site_change_current_line do |form| %>
       <%= select_tag :line_id, options_for_select(Line.order(:name).map {|line| ["#{line.name} #{line.description}", line.id]}, @current_line.id),
         class: 'form-select', onchange: 'this.form.submit()' %>
@@ -23,7 +20,8 @@
 </div>
 
 <div>
-  Orarul estimativ al autobuzelor din Slobozia începând cu data de: <%= @current_line.modified_at.strftime("%d-%m-%Y") %>
+  Orar orientativ <%= Date.today.strftime("%d-%m-%Y") %>
+  <span class="badge bg-primary"><%= @today_kind_long_name %></span>
 </div>
 <div class="table mb-0">
   <table class="table table-hover table-sm caption-top table-responsive mb-0">

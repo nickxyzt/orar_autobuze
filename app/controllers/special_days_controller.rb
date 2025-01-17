@@ -3,7 +3,7 @@ class SpecialDaysController < ApplicationController
 
   # GET /special_days or /special_days.json
   def index
-    @special_days = SpecialDay.all
+    @special_days = SpecialDay.order('day DESC')
   end
 
   # GET /special_days/1 or /special_days/1.json
@@ -25,6 +25,7 @@ class SpecialDaysController < ApplicationController
 
     respond_to do |format|
       if @special_day.save
+        set_special_days
         format.html { redirect_to @special_day, notice: "Special day was successfully created." }
         format.json { render :show, status: :created, location: @special_day }
       else
@@ -38,6 +39,7 @@ class SpecialDaysController < ApplicationController
   def update
     respond_to do |format|
       if @special_day.update(special_day_params)
+        set_special_days
         format.html { redirect_to special_days_url, notice: "Special day was successfully updated." }
         format.json { render :show, status: :ok, location: @special_day }
       else
@@ -50,6 +52,7 @@ class SpecialDaysController < ApplicationController
   # DELETE /special_days/1 or /special_days/1.json
   def destroy
     @special_day.destroy
+    set_special_days
 
     respond_to do |format|
       format.html { redirect_to special_days_path, status: :see_other, notice: "Special day was successfully destroyed." }

@@ -9,8 +9,8 @@
   </tr>
   <% @special_days.each do |special_day| %>
     <tr>
-      <td><%= special_day.day %></td>
-      <td><%= special_day.kind_name %></td>
+      <td><%= special_day.day.strftime("%d-%m-%Y, %a") %></td>
+      <td><%= special_day.kind_long_name %></td>
       <td><%= link_to "Edit", edit_special_day_url(special_day) %></td>
       <td><%= button_to "Destroy", special_day, method: :delete %></td>
     </tr>

@@ -18,7 +18,7 @@
 
   <div>
     <%= form.label :kind, style: "display: block" %>
-    <%= form.select :kind_id, options_for_select(SpecialDay::KINDS, special_day.kind_id) %>
+    <%= form.select :kind_id, options_for_select(SpecialDay::KINDS_LONG_NAMES, special_day.kind_id) %>
   </div>
 
   <div>
