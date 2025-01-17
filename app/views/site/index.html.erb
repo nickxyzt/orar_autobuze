@@ -257,14 +257,14 @@
         <%# (el este deja asignat pe unul din modaluri) %>
         addButton = document.getElementById('addToHomeScreen');
         addButton.style.display = "inline";
+        if (<%= session[:app_was_installed] == true %>)
+          <%# Chrome sub Android mai vechi raporteaza incorect aplicatia ca nefiind instalata... %>
+          addButton.style.display = "none";
 
         <%# in functie de platforma, afisam unul din cele 3 modaluri %>
         <% if Time.zone.now >= session[:user_config_next_reminder] %>
           if (isPureChrome())
-            if (<%= session[:app_was_installed] == true %>)
-              <%# Chrome sub Android mai vechi raporteaza incorect aplicatia ca fiind totusi instalata... %>
-              addButton.style.display = "none";
-            else
+            if (<%= session[:app_was_installed] != true %>)
               modal_install.show();
           else
             if (navigator.standalone === false) <%# Safari %>
