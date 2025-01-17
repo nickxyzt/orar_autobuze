@@ -20,7 +20,7 @@ class SiteController < ApplicationController
   def index
     # Pastram in sesiune daca a instalat PWA
     if params[:pwa]
-      session[:user_config_pwa] = true
+      session[:app_was_installed] = true
     end
 
     unless session[:line_id]

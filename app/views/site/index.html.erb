@@ -1,6 +1,3 @@
-<% if session[:user_config_pwa] == true %>
-  PWA
-<% end %>
 <% if Time.zone.now.on_weekend? %>
   <div class="alert alert-danger">ATENȚIE - programul afișat este pentru cursele din timpul săptămânii!<br>Dar lucrăm să implementăm și programul de weekend!</div>
 <% end %>
@@ -143,7 +140,7 @@
     <div class="modal-content">
       <div class="modal-header">
         <h1 class="modal-title fs-5" id="installModalLabel">Dorești să instalezi aplicația noastră?</h1>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        <button type="button" class="btn-close btn-dismiss" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">Instalează aplicația și bucură-te de toate avantajele!</div>
       <div class="modal-footer">
@@ -160,7 +157,7 @@
     <div class="modal-content">
       <div class="modal-header">
         <h1 class="modal-title fs-5" id="infoInstalledModalLabel">Ai instalat deja aplicația</h1>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        <button type="button" class="btn-close btn-dismiss" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">Se pare că <b>ai instalat</b> deja aplicația noastră, dar acum ești în browser. Experiența ta este mai plăcută <b>direct în aplicație</b>.</div>
       <div class="modal-footer">
@@ -176,7 +173,7 @@
     <div class="modal-content">
       <div class="modal-header">
         <h1 class="modal-title fs-5" id="safariMobileModalLabel">Dorești să instalezi aplicația noastră?</h1>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        <button type="button" class="btn-close btn-dismiss" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
         Instalează aplicația și bucură-te de toate avantajele!
@@ -199,7 +196,7 @@
     <div class="modal-content">
       <div class="modal-header">
         <h1 class="modal-title fs-5" id="safariMacModalLabel">Dorești să instalezi aplicația noastră?</h1>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        <button type="button" class="btn-close btn-dismiss" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
         <p>Instalează aplicația și bucură-te de toate avantajele!<br />Iată cum trebuie să faci:</p>
@@ -263,7 +260,7 @@
 
         <%# in functie de platforma, afisam unul din cele 3 modaluri %>
         <% if Time.zone.now >= session[:user_config_next_reminder] %>
-          if (isPureChrome())
+          if (isPureChrome() && <%= session[:app_was_installed] != true %>)
             modal_install.show();
           else
             if (navigator.standalone === false) <%# Safari %>
@@ -279,8 +276,8 @@
       else
       {
         <%# Daca (aplicatia e instalata si suntem in Chrome) %>
-        <%# if (window.matchMedia('(display-mode: standalone)').matches == false && isPureChrome()) %>
-        <%# modal_info_installed_app.show(); %>
+        //if (window.matchMedia('(display-mode: standalone)').matches == false && isPureChrome())
+        //  modal_info_installed_app.show();
       }
     }, 1000);
   });
