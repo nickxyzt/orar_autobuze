@@ -1,3 +1,6 @@
+<% if session[:user_config_pwa] == true %>
+  PWA
+<% end %>
 <% if Time.zone.now.on_weekend? %>
   <div class="alert alert-danger">ATENȚIE - programul afișat este pentru cursele din timpul săptămânii!<br>Dar lucrăm să implementăm și programul de weekend!</div>
 <% end %>
@@ -213,28 +216,27 @@
 </div>
 
 <script>
-  // toata logica pentru instalarea aplicatiei PWA
-  // Detectare daca este instalata: pornim de la premisa ca este
-  // si invalidam daca pe Android se ruleaza beforeinstallprompt
-  // Dupa un timp scurt verificam daca Safari raporteaza ca nu e instalata
-  // Apoi, in functie de situatie, aratam unul din cele 4 modale Bootstrap
-  // ATENTIE - totul se face exact pe browserele dorite (whitelist!)
+  <%# toata logica pentru instalarea aplicatiei PWA %>
+  <%# Detectare daca este instalata: pornim de la premisa ca este %>
+  <%# si invalidam daca pe Android se ruleaza beforeinstallprompt %>
+  <%# Dupa un timp scurt verificam daca Safari raporteaza ca nu e instalata %>
+  <%# Apoi, in functie de situatie, aratam unul din cele 4 modale Bootstrap %>
+  <%# ATENTIE - totul se face exact pe browserele dorite (whitelist!) %>
 
-  let deferredPrompt; // promptul de instalare care apare pe Chrome
-  let app_is_installed = true; // pornim de la aceasta premisa, neaparat!
-  // modalul de invitare la instalare
+  let deferredPrompt; <%# promptul de instalare care apare pe Chrome %>
+  let app_is_installed = true; <%# pornim de la aceasta premisa, neaparat! %>
+  <%# modalul de invitare la instalare %>
   let modal_install             = new bootstrap.Modal(document.getElementById('modal_install_app'));
   let modal_info_safari_mobile  = new bootstrap.Modal(document.getElementById('modal_info_safari_mobile'));
   let modal_info_safari_mac     = new bootstrap.Modal(document.getElementById('modal_info_safari_mac'));
   let modal_info_installed_app  = new bootstrap.Modal(document.getElementById('modal_info_installed_app'));
 
   function isSafariMobile() {
-    return <%= browser.safari? %>;
+    return <%= browser.safari? and browser.platform.ios? %>;
   }
 
   function isSafariMac() {
-    const userAgent = navigator.userAgent;
-    return /Macintosh/.test(userAgent) && /Safari/.test(userAgent) && !/CriOS/.test(userAgent) && !/FxiOS/.test(userAgent);
+    return <%= browser.safari? and browser.platform.mac? %>;
   }
 
   function isPureChrome() {
@@ -242,29 +244,29 @@
   }
 
   document.addEventListener('DOMContentLoaded', function() {
-    // Pornim executia dupa un timp scurt de la pornire 
-    // (sa avem variabila "app_is_installed" setata de "beforeinstallprompt")
+    <%# Pornim executia dupa un timp scurt de la pornire  %>
+    <%# (sa avem variabila "app_is_installed" setata de "beforeinstallprompt") %>
     setTimeout(function() {
-      // verificam daca suntem pe Safari si (nu este instalata SAU suntem in browser)
-      // Safari NU are o metoda de a verifica daca aplicatia e instalata daca nu suntem in ea!
-      // (verificarea pe Android se face automat prin evenimentul beforeinstallprompt)
+      <%# verificam daca suntem pe Safari si (nu este instalata SAU suntem in browser) %>
+      <%# Safari NU are o metoda de a verifica daca aplicatia e instalata daca nu suntem in ea! %>
+      <%# (verificarea pe Android se face automat prin evenimentul beforeinstallprompt) %>
       if ((isSafariMobile() || isSafariMac()) && navigator.standalone === false) {
         app_is_installed = false;
       }
 
       if (!app_is_installed)
       {
-        // afisam butonul de "descarcare"
+        <%# afisam butonul de "descarcare" %>
+        <%# (el este deja asignat pe unul din modaluri) %>
         addButton = document.getElementById('addToHomeScreen');
         addButton.style.display = "inline";
 
-        // in functie de platforma, afisam unul din cele 3 modaluri
-        // (el este deja asignat pe unul din modaluri)
+        <%# in functie de platforma, afisam unul din cele 3 modaluri %>
         <% if Time.zone.now >= session[:user_config_next_reminder] %>
           if (isPureChrome())
             modal_install.show();
           else
-            if (navigator.standalone === false) // Safari
+            if (navigator.standalone === false) <%# Safari %>
             {
               if (isSafariMobile())
                 modal_info_safari_mobile.show();
@@ -276,28 +278,28 @@
       }
       else
       {
-        // Daca (aplicatia e instalata si suntem in Chrome)
-        // if (window.matchMedia('(display-mode: standalone)').matches == false && isPureChrome())
-        //   modal_info_installed_app.show();
+        <%# Daca (aplicatia e instalata si suntem in Chrome) %>
+        <%# if (window.matchMedia('(display-mode: standalone)').matches == false && isPureChrome()) %>
+        <%# modal_info_installed_app.show(); %>
       }
     }, 1000);
   });
 
-  // Daca app NU e instalata, sub Android sau Chrome pe desktop, acest eveniment va fi lansat
-  // Evenimentul apare atat la intrarea pe pagina, cat si dupa ce userul da "cancel" in promptul de instalare
+  <%# Daca app NU e instalata, sub Android sau Chrome pe desktop, acest eveniment va fi lansat %>
+  <%# Evenimentul apare atat la intrarea pe pagina, cat si dupa ce userul da "cancel" in promptul de instalare %>
   window.addEventListener('beforeinstallprompt', (e) => {
     if (isPureChrome())
     {
-      app_is_installed = false; // daca acest eveniment se lanseaza, aplicatia nu e instalata
-      // Prevent the default behaviour of whatever browser and OS,
-      // altfel se va intampla doar atat: apare promptul prima data dupa un gest,
-      // apoi intervine perioada de "cooldown" de cateva zile
+      app_is_installed = false; <%# daca acest eveniment se lanseaza, aplicatia nu e instalata %>
+      <%# Prevent the default behaviour of whatever browser and OS, %>
+      <%# altfel se va intampla doar atat: apare promptul prima data dupa un gest, %>
+      <%# apoi intervine perioada de "cooldown" de cateva zile %>
       e.preventDefault(); 
-      deferredPrompt = e; // prompt-ul de instalare aplicatie
+      deferredPrompt = e; <%# prompt-ul de instalare aplicatie %>
 
-      // E necesar ca userul sa interactioneze intai cu un buton
-      // pentru a-i putea aparea promptul de instalare - asa functioneaza PWA
-      // Abia aici legam buttonul sa deschida promptul de instalare
+      <%# E necesar ca userul sa interactioneze intai cu un buton %>
+      <%# pentru a-i putea aparea promptul de instalare - asa functioneaza PWA %>
+      <%# Abia aici legam buttonul sa deschida promptul de instalare %>
       addButton = document.getElementById('btn_install_app');
       addButton.addEventListener('click', () => {
         deferredPrompt.prompt();
@@ -306,29 +308,29 @@
     }
   });
 
-  // Dupa instalare, se ruleaza acest eveniment, si ascundem butonul
+  <%# Dupa instalare, se ruleaza acest eveniment, si ascundem butonul %>
   window.addEventListener('appinstalled', () => {
     addButton = document.getElementById('addToHomeScreen');
     addButton.style.display = "none";
     app_is_installed = true;
   });
 
-  // Butonul de "download" manual al aplicatiei
+  <%# Butonul de "download" manual al aplicatiei %>
   addButton = document.getElementById('addToHomeScreen');
   addButton.addEventListener('click', () => {
     if (isPureChrome())
-      modal_install.show(); // Show the modal inviting the user to install
+      modal_install.show(); <%# Show the modal inviting the user to install %>
     if (isSafariMobile())
-      modal_info_safari_mobile.show(); // Show the modal with info
+      modal_info_safari_mobile.show(); <%# Show the modal with info %>
     if (isSafariMac())
-      modal_info_safari_mac.show(); // Show the modal with info
+      modal_info_safari_mac.show(); <%# Show the modal with info %>
   });
 
-  // Butoanele de inchidere modaluri (le consideram "dismiss")
+  <%# Butoanele de inchidere modaluri (le consideram "dismiss") %>
   document.querySelectorAll('.btn-dismiss').forEach(button => {
     button.addEventListener('click', () => {
-      const url = '/site/dismiss_button'; // Retrieve the URL from the data attribute
-      // Make a background request
+      const url = '/site/dismiss_button'; <%# Retrieve the URL from the data attribute %>
+      <%# Make a background request %>
       fetch(url);
     });
   });
@@ -336,23 +338,23 @@
 <% ######################################################### %>
 
 <script>
-  // afisare modal de confirmare
+  <%# afisare modal de confirmare %>
   function confirmation_modal(line_id, line_name, station_id, station_name, kind) {
     document.getElementById("modal_body_content").innerHTML = 'Confirmi că autobuzul <b>' + line_name + '</b> a ' + kind + ' stația <b>' + station_name + '</b>?';
     document.getElementById("modal_line_id").value = line_id;
     document.getElementById("modal_station_id").value = station_id;
   }
 
-  // memoram culoarea default (din variabila CSS)
+  <%# memoram culoarea default (din variabila CSS) %>
   if (typeof default_bg_color === 'undefined') {
     default_bg_color = getComputedStyle(document.querySelector(".table-hover tbody tr")).getPropertyValue('--bs-table-bg').trim();
   }
   odd_columns_bg_color = "#f2f2f2"
 
   function color_table() {
-    // Reset background color on all cells
+    <%# Reset background color on all cells %>
     document.querySelectorAll('.table-hover tbody tr td').forEach(cell => cell.style.setProperty('background-color', default_bg_color));
-    // Color all cells in even columns
+    <%# Color all cells in even columns %>
     document.querySelectorAll('.table tbody tr td:nth-child(even)').forEach(row => row.style.setProperty("background-color", odd_columns_bg_color));
   }
 
@@ -360,17 +362,17 @@
 </script>
 
 <script>
-  // ***** Functii utilitare pentru tabel *****
-  // Colorare rand si coloana pe celula selectata
+  <%# ***** Functii utilitare pentru tabel ***** %>
+  <%# Colorare rand si coloana pe celula selectata %>
   document.querySelectorAll(".table-hover tbody tr").forEach(row => {
     row.addEventListener("click", function(e){
       color_table();
-      // Color the selected row
+      <%# Color the selected row %>
       document.querySelectorAll('.table-hover tbody tr td').forEach(cell => {
         if (cell.parentElement == row) 
           cell.style.setProperty('background-color', 'var(--bs-info)');
       });
-      // Color the selected column
+      <%# Color the selected column %>
       const cellIndex = e.target.closest('td').cellIndex;
       if (cellIndex > 0)
       {
@@ -382,12 +384,12 @@
     });
   });
 
-  // Scroll to table cell
+  <%# Scroll to table cell %>
   function scrollToCell()
   {
     return null;
-    const row = 8; // Target row (1-based index)
-    const col = 3; // Target column (1-based index)
+    const row = 8; <%# Target row (1-based index) %>
+    const col = 3; <%# Target column (1-based index) %>
 
     const table = document.getElementById("schedule-table");
     const cell = table.rows[row]?.cells[col];
@@ -399,31 +401,31 @@
     }
   }
 
-  // automatically update the height of schedule table
+  <%# automatically update the height of schedule table %>
   function updateMaxHeight() {
     const table = document.getElementById('schedule-table');
     const rect = table.getBoundingClientRect();
     
-    // Distance from the top of the table to the top of the viewport
+    <%# Distance from the top of the table to the top of the viewport %>
     const distanceFromTop = rect.top;
     
-    // Height of the viewport (browser window)
+    <%# Height of the viewport (browser window) %>
     const windowHeight = window.innerHeight;
 
-    // Distance from the top of the table to the bottom of the screen
+    <%# Distance from the top of the table to the bottom of the screen %>
     const distanceToBottom = windowHeight - distanceFromTop;
     document.getElementById('div-table-responsive').style.maxHeight = '' + distanceToBottom + 'px';
   }
 </script>
 
 <script>
-  // bindings
+  <%# bindings %>
   window.addEventListener('load', updateMaxHeight);
   window.addEventListener('resize', updateMaxHeight);
   window.addEventListener('load', scrollToCell);
   window.addEventListener('resize', scrollToCell);
 
-  // Bootstrap - initialize all popovers
+  <%# Bootstrap - initialize all popovers %>
   document.addEventListener('DOMContentLoaded', function () {
     var popoverTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="popover"]'));
     popoverTriggerList.forEach(function (popoverTriggerEl) {
@@ -431,8 +433,8 @@
     });
   });
 
-  // Social Media buttons
-  const url = encodeURIComponent(window.location.href); // Get the current page URL
+  <%# Social Media buttons %>
+  const url = encodeURIComponent(window.location.href); <%# Get the current page URL %>
   const text = encodeURIComponent("Orarul autobuzelor din Slobozia");
   document.getElementById('whatsappShare').addEventListener('click', () => {
     window.open(`https://wa.me/?text=${text} ${url}`, '_blank');
@@ -444,4 +446,3 @@
     window.open(`https://twitter.com/intent/tweet?text=${text}&url=${url}`, '_blank');
   });
 </script>
-

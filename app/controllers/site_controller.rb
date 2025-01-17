@@ -2,7 +2,7 @@ class SiteController < ApplicationController
   skip_before_action :verify_authenticity_token
 
   # Deocamdata definite aici
-  REMINDER_TIMES = [2.minutes, 10.minutes, 30.minutes, 4.hours, 1.days, 5.days, 30.days]
+  REMINDER_TIMES = [10.minutes, 60.minutes, 1.days, 3.days, 7.days]
 
   def dismiss_button
     # Daca a apasat in trecut pe butoane din modaluri, refuzand instalarea
