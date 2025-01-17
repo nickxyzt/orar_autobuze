@@ -133,6 +133,7 @@
 <% ######################################################### %>
 <% # MODALELE DE INSTALARE SI INFORMARE %>
 <% # IMPREUNA CU JAVASCRIPT %>
+<% # [PWA] %>
 
 <%# modal instalare aplicatie %>
 <div class="modal fade" id="modal_install_app" tabindex="-1" aria-labelledby="installModalLabel" aria-hidden="true">
@@ -342,7 +343,7 @@
 <% ######################################################### %>
 
 <script>
-  <%# afisare modal de confirmare %>
+  <%# afisare modal de confirmare oprire autobuz %>
   function confirmation_modal(line_id, line_name, station_id, station_name, kind) {
     document.getElementById("modal_body_content").innerHTML = 'Confirmi că autobuzul <b>' + line_name + '</b> a ' + kind + ' stația <b>' + station_name + '</b>?';
     document.getElementById("modal_line_id").value = line_id;

@@ -2,8 +2,10 @@ class SiteController < ApplicationController
   skip_before_action :verify_authenticity_token
 
   # Deocamdata definite aici
+  # [PWA]
   REMINDER_TIMES = [10.minutes, 60.minutes, 1.days, 3.days, 7.days]
 
+  # [PWA]
   def dismiss_button
     # Daca a apasat in trecut pe butoane din modaluri, refuzand instalarea
     if Time.zone.now >= session[:user_config_next_reminder]
@@ -19,6 +21,7 @@ class SiteController < ApplicationController
 
   def index
     # Pastram in sesiune daca a instalat PWA
+    # [PWA]
     if params[:pwa_mode]
       session[:app_was_installed] = true
     end
