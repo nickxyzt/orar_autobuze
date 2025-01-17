@@ -260,8 +260,12 @@
 
         <%# in functie de platforma, afisam unul din cele 3 modaluri %>
         <% if Time.zone.now >= session[:user_config_next_reminder] %>
-          if (isPureChrome() && <%= session[:app_was_installed] != true %>)
-            modal_install.show();
+          if (isPureChrome())
+            if (<%= session[:app_was_installed] == true %>)
+              <%# Chrome sub Android mai vechi raporteaza incorect aplicatia ca fiind totusi instalata... %>
+              addButton.style.display = "none";
+            else
+              modal_install.show();
           else
             if (navigator.standalone === false) <%# Safari %>
             {
