@@ -32,7 +32,7 @@ class SiteController < ApplicationController
       @current_line = Line.find(session[:line_id])
     end
     @current_stations = @current_line.stations
-    today_kind_id = SpecialDay.kind_id_of(Date.today)
+    today_kind_id = SpecialDay.kind_id_of(Time.zone.today)
     today_kind_name = SpecialDay.new(kind_id: today_kind_id).kind_name
     @today_kind_long_name = SpecialDay.new(kind_id: today_kind_id).kind_long_name
 

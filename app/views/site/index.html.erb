@@ -1,7 +1,3 @@
-<% if Time.zone.now.on_weekend? %>
-  <div class="alert alert-danger">ATENȚIE - programul afișat este pentru cursele din timpul săptămânii!<br>Dar lucrăm să implementăm și programul de weekend!</div>
-<% end %>
-
 <div id="socialButtons">
   <button id="addToHomeScreen" class="btn btn-primary btn-sm" style="display: none;"><i class="bi bi-download"></i></button>
   <button id="whatsappShare" class="btn btn-outline-success btn-sm"><i class="bi bi-whatsapp"></i></button>
@@ -20,7 +16,7 @@
 </div>
 
 <div>
-  Orar orientativ <%= Date.today.strftime("%d-%m-%Y") %>
+  Orar orientativ <%= Time.zone.today.strftime("%d-%m-%Y") %>
   <span class="badge bg-primary"><%= @today_kind_long_name %></span>
 </div>
 
