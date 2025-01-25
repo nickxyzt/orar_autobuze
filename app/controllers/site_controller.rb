@@ -107,6 +107,8 @@ class SiteController < ApplicationController
         end
         @schedule << station_data
       end
+
+      # Recalculare @schedule pe baza noului algoritm
     else
       @error_message = "Autobuzul #{@current_line.name} nu circulă în această zi!"
     end

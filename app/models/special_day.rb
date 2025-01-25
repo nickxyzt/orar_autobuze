@@ -1,4 +1,5 @@
 class SpecialDay < ApplicationRecord
+  after_commit :update_cache_version
   validates_uniqueness_of :day
 
   # Tipurile de zile, stabilite de conducere si legal
@@ -19,7 +20,7 @@ class SpecialDay < ApplicationRecord
 
   # Tipul unei zile
   def self.kind_id_of(day)
-    found_day = ApplicationController.special_days.find {|elem| elem.day == day}
+    found_day = self.cached_data.find {|elem| elem.day == day}
     if found_day
       found_day.kind_id
     else
@@ -30,6 +31,23 @@ class SpecialDay < ApplicationRecord
         2 # :holiday - weekend are acelasi tratament cu sarbatorile legale
       end
     end
+  end
+
+  def self.cached_data
+    version = Rails.cache.fetch("special_days_version") do 
+      # daca cumva nu este stabilita versiunea, o setam pe ultimul update_at
+      maximum(:updated_at)&.to_i || 0
+    end
+    Rails.cache.fetch("special_days/v#{version}") do
+      # se executa doar daca nu exista cache-ul cu exact acest nume
+      all.to_a
+    end
+  end
+
+  private
+  def update_cache_version
+    # actualizam VERSIUNEA de cache
+    Rails.cache.write("special_days_version", self.class.maximum(:updated_at)&.to_i)
   end
 
 end
