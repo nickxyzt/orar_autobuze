@@ -9,7 +9,7 @@ module Cacheable extend ActiveSupport::Concern
     def cached_data
       # pentru a evita erori datorate Class Reloading
       if Rails.env == 'development'
-        self.all 
+        self.all.to_a
       else
         # cod de productie
         version = Rails.cache.fetch("#{name.underscore.pluralize}_version") do 

@@ -2,6 +2,9 @@ require "active_support/core_ext/integer/time"
 
 Rails.application.configure do
   # Settings specified here will take precedence over those in config/application.rb.
+  
+  # Configurare sesiuni in BD
+  Rails.application.config.session_store :active_record_store, key: '_slobozia_mea'
 
   # Code is not reloaded between requests.
   config.cache_classes = true

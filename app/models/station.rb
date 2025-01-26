@@ -1,4 +1,5 @@
 class Station < ApplicationRecord
+  include Cacheable
   validates_uniqueness_of :name
   validates_presence_of :name, :display_name
 

@@ -109,8 +109,18 @@ class SiteController < ApplicationController
       end
 
       # Recalculare @schedule pe baza noului algoritm
+      # obtinem variabila @checkpoints = id-urile statiilor importante
+      today_times_table = @current_line.times_table[today_kind_name][1]
+      # inlocuim cuvintele "start" si "end" cu id-urile statiilor
+      today_times_table[0] = today_times_table.delete("start")
+      today_times_table[@current_stations[-1].id] = today_times_table.delete("end")
+
+#      @checkpoint_stations = today_times_table.keys.map do |station_index| 
+#        @current_stations.find {|elem| @current_line.station_list[station_index]}.name
+#      end
+
     else
-      @error_message = "Autobuzul #{@current_line.name} nu circulă în această zi!"
+      @error_message = "Linia #{@current_line.name} nu circulă în această zi!"
     end
   end
 
