@@ -4,7 +4,7 @@ class StationsController < ApplicationController
 
   # GET /stations or /stations.json
   def index
-    @stations = Station.order(:name)
+    @stations = Station.order(:id)
   end
 
   # GET /stations/1 or /stations/1.json

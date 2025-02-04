@@ -1,3 +1,8 @@
+<style>
+  .bus-left {
+    background-color: rgba(211, 211, 211, 1) !important;
+  }
+</style>
 <div id="socialButtons">
   <button id="addToHomeScreen" class="btn btn-primary btn-sm" style="display: none;"><i class="bi bi-download"></i></button>
   <button id="whatsappShare" class="btn btn-outline-success btn-sm"><i class="bi bi-whatsapp"></i></button>
@@ -33,9 +38,12 @@
   </div>
 
   <div class="table-responsive" style="max-height: 350px; overflow-y: auto;" id="div-table-responsive">
+    <% max_bus_left_time = 0 %>
+    <% max_bus_left_row  = 0 %>
+    <% max_bus_left_col  = 0 %>
     <table class="table table-hover table-sm caption-top table-responsive mb-0" id="schedule-table">
       <tbody>
-        <% @stations_ids.each do |station_id| %>
+        <% @stations_ids.each_with_index do |station_id, index_station| %>
           <% course_schedule = @estimated_schedule[station_id] %>
           <% station = Station.find(station_id) %>
           <tr>
@@ -59,38 +67,38 @@
                 <%= station.master_station.display_name %>
               <% end %>
             </td>
-            <% @courses_count.times do |index_cursa| %>
+            <% @courses_count.times do |index_curse| %>
+              <% moment_estimat = @estimated_schedule[station_id][index_curse] %>
+
               <%# stilul pentru orele de sosire %>
               <% td_style = "" %>
               <% td_class = "" %>
+              <% if Moment.new.time >= Moment.new(moment_estimat).time %>
+                <% unless @special_stations_ids.include? station.id %>
+                  <% td_class = "bus-left " %>
+                <% end %>
+                <% if Moment.new(moment_estimat).time > max_bus_left_time %>
+                  <% max_bus_left_time = Moment.new(moment_estimat).time %>
+                  <% max_bus_left_row  = index_station %>
+                  <% max_bus_left_col  = index_curse %>
+                <% end %>
+              <% end %>
               <% if @special_stations_ids.include? station.id %>
-                <% td_style = "position: sticky; z-index: 2; border: 0px; font-weight: bold;" %>
-                <% td_class = "bg-warning" %>
+                <% td_style += "position: sticky; z-index: 2; border: 0; font-weight: bold;" %>
+                <% td_class += "bg-warning " %>
               <% end %>
               <% if station_id == @stations_ids.first %>
-                <% td_style += "top: 0px;" %>
+                <% td_style += "top: 0; " %>
               <% elsif station_id == @stations_ids.last %>
-                <% td_style += "bottom: 0px;" %>
+                <% td_style += "bottom: 0;" %>
               <% end %>
+
+              <%# Stabilire mesaj pentru popover si clasa de background %>
+              <% bs_title = moment_estimat %>
+              <% bs_content = "Calculat estimativ." %>
               <td class="text-center text-secondary <%= td_class %>" style ="<%= td_style %>">
-                <% moment_estimat = @estimated_schedule[station_id][index_cursa] %>
-                <% moment_confirmat = nil %>
-
-                <%# Stabilire mesaj pentru popover %>
-                <% unless moment_confirmat.blank? %>
-                  <% bs_title = moment_confirmat %>
-                  <% bs_content = "Media confirmărilor de la călători." %>
-                <% else %>
-                  <% bs_title = moment_estimat %>
-                  <% bs_content = "Calculat estimativ." %>
-                <% end %>
-
                 <a tabindex="0" class="text-decoration-none" role="button" data-bs-toggle="popover" data-bs-trigger="focus" data-bs-title="<%= bs_title %>" data-bs-content="<%= bs_content %>">
-                  <% unless moment_confirmat.blank? %>
-                    <span class="text-success lead"><b><%= moment_confirmat %></b></span>
-                  <% else %>
-                    <span class="text-primary small"><%= moment_estimat %></span>
-                  <% end %>
+                  <span class="text-primary small"><%= moment_estimat %></span>
                 </a>
               </td>
             <% end %>
@@ -383,21 +391,20 @@
   });
 
   <%# Scroll to table cell %>
-  function scrollToCell()
+  <%# 0-based index %>
+  function scrollToCell(row, col)
   {
-    return null;
-    const row = 8; <%# Target row (1-based index) %>
-    const col = 3; <%# Target column (1-based index) %>
-
     const table = document.getElementById("schedule-table");
-    const cell = table.rows[row]?.cells[col];
+    const cell = table.rows[row]?.cells[col+1];
 
     if (cell) {
       cell.scrollIntoView({ behavior: "smooth", block: "center", inline: "center" });
-      cell.style.backgroundColor = "yellow";
-      cell.classList.add("bg-warning");
+      cell.style.setProperty("background-color", "rgba(255, 165, 0, 1)", "important");
     }
   }
+
+  <%# Navigare la randul si coloana potrivita %>
+  scrollToCell(<%= max_bus_left_row %>, <%= max_bus_left_col %>)
 
   <%# automatically update the height of schedule table %>
   function updateMaxHeight() {

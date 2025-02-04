@@ -16,11 +16,11 @@ class Line < ApplicationRecord
   # programul estimativ al curselor, calculat!
   # Un hash de tipul {1 => ["06:00", ...], 7 => ["08:00", ...]}
   def estimated_schedule(day)
-    today_kind_id = SpecialDay.kind_id_of(day)
-    today_kind_name = SpecialDay.new(kind_id: today_kind_id).kind_name
+    day_kind_id = SpecialDay.kind_id_of(day)
+    day_kind_name = SpecialDay.new(kind_id: day_kind_id).kind_name
     # Poulam intai hash-ul cu orele fixe din baza de date
-    today_estimate_table = {}
-    self.times_table[today_kind_name][1].each do |key, value|
+    day_estimate_table = {}
+    self.times_table[day_kind_name][1].each do |key, value|
       # inlocuim cuvintele "start" si "end" cu id-urile statiilor
       case key
       when "start"
@@ -28,14 +28,14 @@ class Line < ApplicationRecord
       when "end"
         key = self.station_list[-1]
       end
-      today_estimate_table[key] = value
+      day_estimate_table[key] = value
     end
-    special_stations_ids = today_estimate_table.keys
+    special_stations_ids = day_estimate_table.keys
     stations_ids         = self.station_list
-    nr_of_courses        = today_estimate_table.values.first.size
+    nr_of_courses        = day_estimate_table.values.first.size
 
     stations_ids.each do |station_id|
-      today_estimate_table[station_id] ||= []
+      day_estimate_table[station_id] ||= []
     end
     
     # nr de curse
@@ -49,15 +49,15 @@ class Line < ApplicationRecord
           station_end_index   = stations_ids.index(station_end_id)
           intermediary_stations_ids = stations_ids[station_start_index .. station_end_index]
           # Obtinem momentele estimate pentru statiile intermediare
-          new_moments = Moment.split(today_estimate_table[station_start_id][index_course], today_estimate_table[station_end_id][index_course], intermediary_stations_ids.count)
+          new_moments = Moment.split(day_estimate_table[station_start_id][index_course], day_estimate_table[station_end_id][index_course], intermediary_stations_ids.count)
           # Le introducem in Hash, fara capetele Array-ului cu momentele noi
           intermediary_stations_ids[1..-2].each_with_index do |station_id, index|
-            today_estimate_table[station_id] << new_moments[index]
+            day_estimate_table[station_id] << new_moments[index]
           end
         end
       end
     end
 
-    return today_estimate_table
+    return day_estimate_table
   end
 end
