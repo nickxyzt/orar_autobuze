@@ -30,6 +30,10 @@ class Moment
     ("%02d" % hour) + (":%02d" % min)
   end
 
+  def to_time
+    Time.parse("#{Time.zone.today.to_s} #{self.to_s}")
+  end
+
   # Impartire timpi INTRE start si stop, pe un numar de statii
   # (start si stop se EXCLUD!)
   # start_time, end_time sunt STRING-uri

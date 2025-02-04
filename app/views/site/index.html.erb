@@ -403,9 +403,6 @@
     }
   }
 
-  <%# Navigare la randul si coloana potrivita %>
-  scrollToCell(<%= max_bus_left_row %>, <%= max_bus_left_col %>)
-
   <%# automatically update the height of schedule table %>
   function updateMaxHeight() {
     const table = document.getElementById('schedule-table');
@@ -421,6 +418,30 @@
     const distanceToBottom = windowHeight - distanceFromTop;
     document.getElementById('div-table-responsive').style.maxHeight = '' + distanceToBottom + 'px';
   }
+
+  <%# Navigare la randul si coloana potrivita %>
+  scrollToCell(<%= max_bus_left_row %>, <%= max_bus_left_col %>);
+
+  <%# Programam refresh paginii pentru urmatoarea sosire in pagina %>
+  <%# Calculam intai momentul in care autobuzul va fi intr-o statie in viitor %>
+  <% next_start =  @estimated_schedule.values.flatten.uniq.map {|elem| Moment.new(elem).time}.select{|elem| elem > max_bus_left_time}.sort.first %>
+  var interval;
+  <% if next_start %>
+    interval = <%= ((Moment.new(next_start).to_time - Time.zone.now)* 1000 + 100).to_i %>;
+  <% else %>
+    <%# peste o ora %>
+    interval = <%= 60 * 60 * 1000 %>;
+  <% end %>
+  setInterval(() => {
+    location.reload();
+  }, interval);
+
+  <%# Pentru PWA, cand este din nou activa, facem refresh %>
+  document.addEventListener("visibilitychange", () => {
+    if (!document.hidden) {
+        location.reload();
+    }
+  });
 </script>
 
 <script>
