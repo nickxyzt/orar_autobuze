@@ -437,11 +437,13 @@
   }, interval);
 
   <%# Pentru PWA, cand este din nou activa, facem refresh %>
-  document.addEventListener("visibilitychange", () => {
-    if (!document.hidden) {
-        location.reload();
-    }
-  });
+  <% if session[:app_was_installed] %>
+    document.addEventListener("visibilitychange", () => {
+      if (!document.hidden) {
+          location.reload();
+      }
+    });
+  <% end %>
 </script>
 
 <script>
