@@ -30,7 +30,8 @@ class Moment
     ("%02d" % hour) + (":%02d" % min)
   end
 
-  # Impartire timpi intre start si stop, pe un numar de statii
+  # Impartire timpi INTRE start si stop, pe un numar de statii
+  # (start si stop se EXCLUD!)
   # start_time, end_time sunt STRING-uri
   # station_count = numarul TOTAL de statii, inclusiv pornire si oprire
   def self.split(start_time, end_time, station_count)
@@ -44,6 +45,6 @@ class Moment
     (station_count-1).times do |index|
       rv << Moment.new((start_t.time + media*(index+1)).to_i).to_s
     end
-    rv
+    rv[1..-2]
   end
 end

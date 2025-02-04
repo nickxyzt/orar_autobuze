@@ -31,94 +31,28 @@ class SiteController < ApplicationController
     else
       @current_line = Line.find(session[:line_id])
     end
-    @current_stations = @current_line.stations
-    today_kind_id = SpecialDay.kind_id_of(Time.zone.today)
-    today_kind_name = SpecialDay.new(kind_id: today_kind_id).kind_name
+    today_kind_id         = SpecialDay.kind_id_of(Time.zone.today)
+    today_kind_name       = SpecialDay.new(kind_id: today_kind_id).kind_name
     @today_kind_long_name = SpecialDay.new(kind_id: today_kind_id).kind_long_name
 
     # Daca circula in astfel de zile
     if @current_line.times_table[today_kind_name]
-      # ultimele confirmari pentru aceasta linie
-      # luam in medie ultimele 10 valori pentru fiecare statie
-      stops = Stop.includes(:line).joins(:line).where(line_id: @current_line.id).
-        where('stops.created_at >= lines.modified_at').
-        order('stops.created_at DESC').
-        limit(@current_stations.size * 10 * @current_line.times_table[today_kind_name][1][:start].size).
-        map {|stop| [stop.station_id, Moment.new(stop.created_at.strftime("%H:%M"))]}
-
-      # ultima confirmare venita de la user pentru linia curenta
-      # (necesar pt a nu mai putea confirma statiile de dinaintea ei)
-      latest_user_confirmation = @current_line.stops.
-        where(session_id: session[:session_id]).
-        where(line_id: session[:line_id]).
-        where('created_at > ?', Time.zone.now - 15.minutes).
-        order('created_at').last
-      if latest_user_confirmation
-        # ultima statie confirmata
-        station = Station.find latest_user_confirmation.station_id
-        @last_station_confirmed_index = @current_stations.index(station)
-      end
-
-      # Cream o matrice care are pe fiecare rand (statie) un vector cu 3 elemente: 
-      # 1. momentele estimative ale fiecarei statii
-      # 2. momentele medii confirmate ale fiecarei statii
-      # 3. ultimul moment confirmat al fiecarei statii
-      @schedule = []
-      @current_stations.each_with_index do |station, index_station|
-        station_data = [] # adaugam un rand pentru statie
-        # pentru fiecare cursa in parte, creare momente estimate
-        @current_line.times_table[today_kind_name][1][:start].each_with_index do |time_start, index_cursa|
-          # Etapa I - cream Array-urile cu:
-          # - timpii estimati pe baza intregului traseu
-          # - timpii raportati in trecut de utilizatori si soferi (cu distanta threshold fata de timpii estimati)
-          # - timpii REALI raportati de soferi, sau in lipsa lor, de utilizatori
-          start_t = Moment.new(@current_line.times_table[today_kind_name][1][:start][index_cursa])
-          end_t   = Moment.new(@current_line.times_table[today_kind_name][1][:end][index_cursa])
-          # durata intervalului unei curse intregi
-          durata  = end_t.time - start_t.time
-          # durata medie a unui interval
-          media   = durata.to_f / (@current_stations.size - 1)
-
-          # cat dureaza de la prima statie pana aici
-          moment_estimat = Moment.new(start_t.time + (index_station * media).to_i)
-          # momentul de final il preluam, sa nu apara rotunjiri
-          if index_station == @current_stations.size - 1
-            moment_estimat = end_t
-          end
-
-          # Etapa II - corectam Array-ul timpilor estimati, pe baza:
-          # - matricii timpilor REALI, daca exista
-          # - matricii timpilor raportati (in trecut deci)
-
-          # identificam inregistrarile pe aceasta linie care sunt in jurul momentului
-          # folosim campul time_threshold
-          matched_stops = stops.select{|station_id, stop| station_id == station.id and (stop.time >= start_t.time - 2) and (stop.time - moment_estimat.time).abs <= @current_line.time_threshold}.
-            map {|elem| elem[1].time}
-          moment_mediu = nil
-          if matched_stops.size > 0
-            moment_mediu = Moment.new(matched_stops.sum / matched_stops.size).to_s
-          end
-
-          # ultimul moment confirmat al acestei curse
-          moment_confirmat = media
-
-          # creare vector cu 3 elemente
-          station_data << [moment_estimat.to_s, moment_mediu.to_s, moment_confirmat]
+      @estimated_schedule   = @current_line.estimated_schedule(Time.zone.today)
+      @courses_count        = @estimated_schedule.first[1].size
+      @stations_ids         = @current_line.station_list
+      # Reprezinta un Hash cu orele fixe din baza de date
+      today_times_table = {}
+      @current_line.times_table[today_kind_name][1].each do |key, value|
+        # inlocuim cuvintele "start" si "end" cu id-urile statiilor
+        case key
+        when "start"
+          key = @stations_ids[0]
+        when "end"
+          key = @stations_ids[-1]
         end
-        @schedule << station_data
+        today_times_table[key] = value
       end
-
-      # Recalculare @schedule pe baza noului algoritm
-      # obtinem variabila @checkpoints = id-urile statiilor importante
-      today_times_table = @current_line.times_table[today_kind_name][1]
-      # inlocuim cuvintele "start" si "end" cu id-urile statiilor
-      today_times_table[0] = today_times_table.delete("start")
-      today_times_table[@current_stations[-1].id] = today_times_table.delete("end")
-
-#      @checkpoint_stations = today_times_table.keys.map do |station_index| 
-#        @current_stations.find {|elem| @current_line.station_list[station_index]}.name
-#      end
-
+      @special_stations_ids = today_times_table.keys
     else
       @error_message = "Linia #{@current_line.name} nu circulă în această zi!"
     end
