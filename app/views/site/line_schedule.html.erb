@@ -4,7 +4,7 @@
   <div class="col col-8">
     <%= form_tag :site_change_current_line do |form| %>
       <%= select_tag :line_id, options_for_select(Line.order(:priority).map {|line| ["#{line.name} #{line.description}", line.id]}, @current_line.id),
-        class: 'form-select', onchange: 'this.form.submit()' %>
+        class: 'form-select bg-info', onchange: 'this.form.submit()' %>
     <% end %>
   </div>
 </div>
@@ -53,8 +53,8 @@
               <% td_style += "background: #fff; z-index: 1;" %>
             <% end %>
             <td style="<%= td_style %>" class="<%= td_class %>">
-              <%= button_tag class: 'btn btn-success disabled btn-sm py-0' do %>
-                <%= station.master_station.display_name %>
+              <%= link_to site_station_schedule_url(station.id), class: 'btn btn-outline-dark btn-sm' do %>
+                <%= station.display_name %>
               <% end %>
             </td>
             <% @courses_count.times do |index_curse| %>

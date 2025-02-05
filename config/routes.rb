@@ -1,5 +1,5 @@
 Rails.application.routes.draw do
-  get '/line_schedule', to: 'site#line_schedule', as: :site_line_schedule
+  get '/line_schedule/(:id)', to: 'site#line_schedule', as: :site_line_schedule
   get '/station_schedule/(:id)', to: 'site#station_schedule', as: :site_station_schedule
   get 'site/dismiss_button'
   get '/pwa', to: 'site#index', defaults: { pwa_mode: 'pwa' }

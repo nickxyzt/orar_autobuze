@@ -28,11 +28,9 @@ class SiteController < ApplicationController
   end
 
   def line_schedule
-    unless session[:line_id]
-      @current_line = Line.first
-    else
-      @current_line = Line.find(session[:line_id])
-    end
+    session[:line_id] = params[:id] if params[:id]
+    session[:line_id] ||= Line.first.id
+    @current_line         = Line.find(session[:line_id])
     today_kind_id         = SpecialDay.kind_id_of(Time.zone.today)
     today_kind_name       = SpecialDay.new(kind_id: today_kind_id).kind_name
     @today_kind_long_name = SpecialDay.new(kind_id: today_kind_id).kind_long_name

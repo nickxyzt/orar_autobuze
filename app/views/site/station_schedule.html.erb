@@ -4,7 +4,7 @@
   <div class="col col-8">
     <%= form_tag :site_change_current_station do |form| %>
       <%= select_tag :station_id, options_for_select(Station.order(:name).map {|station| [station.name, station.id]}, @current_station.id),
-        class: 'form-select', onchange: 'this.form.submit()' %>
+        class: 'form-select bg-info', onchange: 'this.form.submit()' %>
     <% end %>
   </div>
 </div>
@@ -17,10 +17,10 @@
 
   <% if @related_stations.size > 1 %>
     <br>
-    Vezi și:
+    Stații înrudite:
     <% @related_stations.each do |station| %>
       <% if station != @current_station %>
-        <%= link_to site_station_schedule_url(station), class: 'btn btn-secondary btn-sm' do %>
+        <%= link_to site_station_schedule_url(station), class: 'btn btn-outline-success btn-sm' do %>
           <i class="bi bi-shop-window"></i>
           <%= station.name %>
         <% end %>
@@ -43,7 +43,11 @@
         <% line = Line.find(schedule[1]) %>
         <tr>
           <td style="background-color: <%= line.html_color %>"><%= schedule[0] %></td>
-          <td style="background-color: <%= line.html_color %>"><%= line.name %></td>
+          <td style="background-color: <%= line.html_color %>">
+            <%= link_to site_line_schedule_url(line.id), class: 'btn btn-outline-dark btn-sm' do %>
+              <%= line.name %> <%= line.description %>
+            <% end %>
+          </td>
         </tr>
       <% end %>
     </table>
