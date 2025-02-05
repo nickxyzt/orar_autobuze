@@ -51,14 +51,16 @@
             <% td_style = "position: sticky; left: 0;" %>
             <% td_class = "" %>
             <% if @special_stations_ids.include? station.id %>
-              <% td_style += "top: 0; background: #f2f2f2; z-index: 3; border-bottom: 0;" %>
+              <% td_style += "top: 0; background: #f2f2f2; border-bottom: 0;" %>
               <% td_class = "bg-warning" %>
               <% if station_id == @stations_ids.first %>
-                <% td_style += "top: 0; left: 0;" %>
+                <% td_style += "top: 0; left: 0; z-index: 4;" %>
               <% elsif station_id == @stations_ids.last %>
-                <% td_style += "bottom: 0; left: 0;" %>
+                <% td_style += "bottom: 0; left: 0; z-index: 4;" %>
+              <% else # statie tip checkpoint %>
+                <% td_style += "z-index: 3;" %>
               <% end %>
-            <% else %>
+            <% else # statie obisnuita %>
               <% td_style += "background: #fff; z-index: 1;" %>
             <% end %>
             <td style="<%= td_style %>" class="<%= td_class %>">
@@ -83,13 +85,15 @@
                 <% end %>
               <% end %>
               <% if @special_stations_ids.include? station.id %>
-                <% td_style += "position: sticky; z-index: 2; border: 0; font-weight: bold;" %>
+                <% td_style += "position: sticky; border: 0; font-weight: bold;" %>
                 <% td_class += "bg-warning " %>
               <% end %>
               <% if station_id == @stations_ids.first %>
-                <% td_style += "top: 0; " %>
+                <% td_style += "top: 0; z-index: 3;" %>
               <% elsif station_id == @stations_ids.last %>
-                <% td_style += "bottom: 0;" %>
+                <% td_style += "bottom: 0; z-index: 3;" %>
+              <% else # statie tip checkpoint %>
+                <% td_style += "z-index: 2;" %>
               <% end %>
 
               <%# Stabilire mesaj pentru popover si clasa de background %>
