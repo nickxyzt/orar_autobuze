@@ -15,6 +15,11 @@
   </p>
 
   <p>
+    <strong>HTML color:</strong>
+    <span style="background-color: <%= line.html_color %>"><%= line.html_color %></span>
+  </p>
+
+  <p>
     <strong>Station list:</strong>
     <%= line.stations.map {|station| station.name}.join(', ') %>
   </p>

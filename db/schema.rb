@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2025_02_05_115749) do
+ActiveRecord::Schema[7.0].define(version: 2025_02_05_122209) do
   create_table "lines", force: :cascade do |t|
     t.string "name"
     t.text "station_list"
@@ -21,6 +21,7 @@ ActiveRecord::Schema[7.0].define(version: 2025_02_05_115749) do
     t.text "times_table"
     t.date "modified_at"
     t.integer "priority", default: 0
+    t.string "html_color", default: "#ccc"
   end
 
   create_table "sessions", force: :cascade do |t|

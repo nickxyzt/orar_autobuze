@@ -22,13 +22,18 @@
   </div>
 
   <div>
-    <%= form.label :modified_at, style: "display: block" %>
-    <%= form.date_field :modified_at %>
+    <%= form.label :priority, style: "display: block" %>
+    <%= form.number_field :priority %>
   </div>
 
   <div>
-    <%= form.label :priority, style: "display: block" %>
-    <%= form.number_field :priority %>
+    <%= form.label :html_color, style: "display: block" %>
+    <%= form.color_field :html_color %>
+  </div>
+
+  <div>
+    <%= form.label :modified_at, style: "display: block" %>
+    <%= form.date_field :modified_at %>
   </div>
 
   <div>
