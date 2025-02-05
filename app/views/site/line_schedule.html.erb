@@ -1,0 +1,231 @@
+<%= render 'social_buttons' %>
+<div class="row d-flex align-items-end">
+  <div class="col col-8">
+    <%= form_tag :site_change_current_line do |form| %>
+      <%= select_tag :line_id, options_for_select(Line.order(:name).map {|line| ["#{line.name} #{line.description}", line.id]}, @current_line.id),
+        class: 'form-select', onchange: 'this.form.submit()' %>
+    <% end %>
+  </div>
+</div>
+
+<div>
+  Orar orientativ <%= Time.zone.today.strftime("%d-%m-%Y") %>
+  <span class="badge bg-primary"><%= @today_kind_long_name %></span>
+</div>
+
+<% if @error_message %>
+  <div class="alert alert-danger"><%= @error_message %></div>
+<% else %>
+  <div class="table mb-0">
+    <table class="table table-hover table-sm caption-top table-responsive mb-0">
+      <tr>
+        <th class="text-left bg-success" style="position: sticky; top: 0; left: 0; z-index: 3; border: 0;">Stație <i class="bi bi-bus-front"></i></th>
+        <th colspan="<%= @courses_count %>" class="text-center bg-success" style="position: sticky; top: 0; z-index: 2; border-bottom: 0;">Momente <i class="bi bi-clock-fill"></i></th>
+      </tr>
+    </table>
+  </div>
+
+  <div class="table-responsive" style="max-height: 350px; overflow-y: auto;" id="div-table-responsive">
+    <% max_bus_left_time = 0 %>
+    <% max_bus_left_row  = 0 %>
+    <% max_bus_left_col  = 0 %>
+    <table class="table table-hover table-sm caption-top table-responsive mb-0" id="schedule-table">
+      <tbody>
+        <% @stations_ids.each_with_index do |station_id, index_station| %>
+          <% course_schedule = @estimated_schedule[station_id] %>
+          <% station = Station.find(station_id) %>
+          <tr>
+            <%# stilul pentru coloana cu statiile %>
+            <% td_style = "position: sticky; left: 0;" %>
+            <% td_class = "" %>
+            <% if @special_stations_ids.include? station.id %>
+              <% td_style += "top: 0; background: #f2f2f2; border-bottom: 0;" %>
+              <% td_class = "bg-warning" %>
+              <% if station_id == @stations_ids.first %>
+                <% td_style += "top: 0; left: 0; z-index: 4;" %>
+              <% elsif station_id == @stations_ids.last %>
+                <% td_style += "bottom: 0; left: 0; z-index: 4;" %>
+              <% else # statie tip checkpoint %>
+                <% td_style += "z-index: 3;" %>
+              <% end %>
+            <% else # statie obisnuita %>
+              <% td_style += "background: #fff; z-index: 1;" %>
+            <% end %>
+            <td style="<%= td_style %>" class="<%= td_class %>">
+              <%= button_tag class: 'btn btn-success disabled btn-sm py-0' do %>
+                <%= station.master_station.display_name %>
+              <% end %>
+            </td>
+            <% @courses_count.times do |index_curse| %>
+              <% moment_estimat = @estimated_schedule[station_id][index_curse] %>
+
+              <%# stilul pentru orele de sosire %>
+              <% td_style = "" %>
+              <% td_class = "" %>
+              <% if Moment.new.time >= Moment.new(moment_estimat).time %>
+                <% unless @special_stations_ids.include? station.id %>
+                  <% td_class = "bus-left " %>
+                <% end %>
+                <% if Moment.new(moment_estimat).time > max_bus_left_time %>
+                  <% max_bus_left_time = Moment.new(moment_estimat).time %>
+                  <% max_bus_left_row  = index_station %>
+                  <% max_bus_left_col  = index_curse %>
+                <% end %>
+              <% end %>
+              <% if @special_stations_ids.include? station.id %>
+                <% td_style += "position: sticky; border: 0; font-weight: bold;" %>
+                <% td_class += "bg-warning " %>
+              <% end %>
+              <% if station_id == @stations_ids.first %>
+                <% td_style += "top: 0; z-index: 3;" %>
+              <% elsif station_id == @stations_ids.last %>
+                <% td_style += "bottom: 0; z-index: 3;" %>
+              <% else # statie tip checkpoint %>
+                <% td_style += "z-index: 2;" %>
+              <% end %>
+
+              <%# Stabilire mesaj pentru popover si clasa de background %>
+              <% bs_title = moment_estimat %>
+              <% bs_content = "Calculat estimativ." %>
+              <td class="text-center text-secondary <%= td_class %>" style ="<%= td_style %>">
+                <a tabindex="0" class="text-decoration-none" role="button" data-bs-toggle="popover" data-bs-trigger="focus" data-bs-title="<%= bs_title %>" data-bs-content="<%= bs_content %>">
+                  <span class="text-primary small"><%= moment_estimat %></span>
+                </a>
+              </td>
+            <% end %>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+
+  <%# modal confirmare oprire autobuz %>
+  <div class="modal fade" id="modal_confirmare_stop" tabindex="-1" aria-labelledby="confirmationModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h1 class="modal-title fs-5" id="confirmationModalLabel">Confirmare</h1>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body" id="modal_body_content">
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">NU <i class="bi bi-x-circle-fill"></i></button>
+          <%= form_tag :site_confirm_stop do |form| %>
+            <%= hidden_field_tag :modal_line_id %>
+            <%= hidden_field_tag :modal_station_id %>
+            <button type="submit" class="btn btn-primary">Da, confirm! <i class="bi bi-check-circle-fill"></i></button>
+          <% end %>
+        </div>
+      </div>
+    </div>
+  </div>
+<% end %>
+
+<script>
+  <%# afisare modal de confirmare oprire autobuz %>
+  function confirmation_modal(line_id, line_name, station_id, station_name, kind) {
+    document.getElementById("modal_body_content").innerHTML = 'Confirmi că autobuzul <b>' + line_name + '</b> a ' + kind + ' stația <b>' + station_name + '</b>?';
+    document.getElementById("modal_line_id").value = line_id;
+    document.getElementById("modal_station_id").value = station_id;
+  }
+
+  <%# memoram culoarea default (din variabila CSS) %>
+  if (typeof default_bg_color === 'undefined') {
+    default_bg_color = getComputedStyle(document.querySelector(".table-hover tbody tr")).getPropertyValue('--bs-table-bg').trim();
+  }
+  odd_columns_bg_color = "#f2f2f2"
+
+  function color_table() {
+    <%# Reset background color on all cells %>
+    document.querySelectorAll('.table-hover tbody tr td').forEach(cell => cell.style.setProperty('background-color', default_bg_color));
+    <%# Color all cells in even columns %>
+    document.querySelectorAll('.table tbody tr td:nth-child(even)').forEach(row => row.style.setProperty("background-color", odd_columns_bg_color));
+  }
+
+  color_table();
+</script>
+
+<script>
+  <%# ***** Functii utilitare pentru tabel ***** %>
+  <%# Colorare rand si coloana pe celula selectata %>
+  document.querySelectorAll(".table-hover tbody tr").forEach(row => {
+    row.addEventListener("click", function(e){
+      color_table();
+      <%# Color the selected row %>
+      document.querySelectorAll('.table-hover tbody tr td').forEach(cell => {
+        if (cell.parentElement == row) 
+          cell.style.setProperty('background-color', 'var(--bs-info)');
+      });
+      <%# Color the selected column %>
+      const cellIndex = e.target.closest('td').cellIndex;
+      if (cellIndex > 0)
+      {
+        const rows = row.parentElement.rows;
+        for (let i = 0; i < rows.length; i++) {
+          rows[i].cells[cellIndex].style.backgroundColor = 'var(--bs-info)';
+        }
+      }
+    });
+  });
+
+  <%# Scroll to table cell %>
+  <%# 0-based index %>
+  function scrollToCell(row, col)
+  {
+    const table = document.getElementById("schedule-table");
+    const cell = table.rows[row]?.cells[col+1];
+
+    if (cell) {
+      cell.scrollIntoView({ behavior: "smooth", block: "center", inline: "center" });
+      cell.style.setProperty("background-color", "rgba(255, 165, 0, 1)", "important");
+    }
+  }
+
+  <%# automatically update the height of schedule table %>
+  function updateMaxHeight() {
+    const table = document.getElementById('schedule-table');
+    const rect = table.getBoundingClientRect();
+    
+    <%# Distance from the top of the table to the top of the viewport %>
+    const distanceFromTop = rect.top;
+    
+    <%# Height of the viewport (browser window) %>
+    const windowHeight = window.innerHeight;
+
+    <%# Distance from the top of the table to the bottom of the screen %>
+    const distanceToBottom = windowHeight - distanceFromTop;
+    document.getElementById('div-table-responsive').style.maxHeight = '' + distanceToBottom + 'px';
+  }
+
+  <%# Navigare la randul si coloana potrivita %>
+  scrollToCell(<%= max_bus_left_row %>, <%= max_bus_left_col %>);
+
+  <%# Programam refresh paginii pentru urmatoarea sosire in pagina %>
+  <%# Calculam intai momentul in care autobuzul va fi intr-o statie in viitor %>
+  <% next_start =  @estimated_schedule.values.flatten.uniq.map {|elem| Moment.new(elem).time}.select{|elem| elem > max_bus_left_time}.sort.first %>
+  var interval;
+  <% if next_start %>
+    interval = <%= ((Moment.new(next_start).to_time - Time.zone.now)* 1000 + 100).to_i %>;
+  <% else %>
+    <%# peste 5 minute %>
+    interval = <%= 5 * 60 * 1000 %>;
+  <% end %>
+  setInterval(() => {
+    location.reload();
+  }, interval);
+
+  document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState === "visible") {
+      setInterval(() => {
+        location.reload();
+      }, 20000);
+    }
+  });
+</script>
+
+<script>
+  <%# bindings %>
+  window.addEventListener('load', updateMaxHeight);
+  window.addEventListener('resize', updateMaxHeight);
+</script>

@@ -25,7 +25,9 @@ class SiteController < ApplicationController
     if params[:pwa_mode]
       session[:app_was_installed] = true
     end
+  end
 
+  def line_schedule
     unless session[:line_id]
       @current_line = Line.first
     else
@@ -58,15 +60,18 @@ class SiteController < ApplicationController
     end
   end
 
+  # userul schimba linia pentru care vede orarul
   def change_current_line
     session[:line_id] = params[:line_id]
-    redirect_to site_index_url
+    redirect_to site_line_schedule_url
   end
+
+  # userul schimba statia pentru care vede orarul
 
   def confirm_stop
     new_stop = Stop.new(station_id: params[:modal_station_id], line_id: params[:modal_line_id], session_id: request.session.id)
     new_stop.save
-    redirect_to site_index_url, notice: "Mulțumim pentru implicarea ta în comunitate!|success"
+    redirect_to site_line_schedule_url, notice: "Mulțumim pentru implicarea ta în comunitate!|success"
   end
 
 end

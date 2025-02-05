@@ -1,0 +1,27 @@
+<div class="row">
+ <div class="col" id="socialButtons">
+    <%= link_to root_url, class: 'btn btn-primary btn-sm', data: { turbolinks: false } do %>
+      Acasă <i class="bi bi-house-fill"></i>
+    <% end %>
+    <button id="addToHomeScreen" class="btn btn-primary btn-sm" style="display: none;"><i class="bi bi-download"></i></button>
+    <button id="whatsappShare" class="btn btn-outline-success btn-sm"><i class="bi bi-whatsapp"></i></button>
+    <button id="facebookShare" class="btn btn-outline-primary btn-sm"><i class="bi bi-facebook"></i></button>
+    <button id="twitterShare" class="btn btn-outline-info btn-sm"><i class="bi bi-twitter-x"></i></button>
+    <a href="https://6wk9a8b1.forms.app/my-blank-canvas" class="btn btn-outline-primary btn-sm" target="_blank">Părerea ta <i class="bi bi-emoji-smile"></i></a>
+  </div>
+</div>
+
+<script>
+  <%# Social Media buttons %>
+  const url = encodeURIComponent(window.location.href); <%# Get the current page URL %>
+  const text = encodeURIComponent("Orarul autobuzelor din Slobozia");
+  document.getElementById('whatsappShare').addEventListener('click', () => {
+    window.open(`https://wa.me/?text=${text} ${url}`, '_blank');
+  });
+  document.getElementById('facebookShare').addEventListener('click', () => {
+    window.open(`https://www.facebook.com/sharer/sharer.php?u=${url}`, '_blank');
+  });
+  document.getElementById('twitterShare').addEventListener('click', () => {
+    window.open(`https://twitter.com/intent/tweet?text=${text}&url=${url}`, '_blank');
+  });
+</script>
