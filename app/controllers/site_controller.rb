@@ -66,7 +66,35 @@ class SiteController < ApplicationController
     redirect_to site_line_schedule_url
   end
 
+  # orarul pe o anumita statie
+  def station_schedule
+    session[:station_id] = params[:id] if params[:id]
+    session[:station_id] ||= Station.first.id
+
+    @current_station      = Station.find(session[:station_id])
+    @related_stations     = Station.where(master_station_id: @current_station.master_station_id)
+    today_kind_id         = SpecialDay.kind_id_of(Time.zone.today)
+    today_kind_name       = SpecialDay.new(kind_id: today_kind_id).kind_name
+    @today_kind_long_name = SpecialDay.new(kind_id: today_kind_id).kind_long_name
+
+    # Array cu elemente [stop_time, station_id], exemplu: [["08:00", 5], ["09:00", 5], ["09:10", 6] ...]
+    @estimated_schedule = []
+    Line.all.each do |line| 
+      line_schedule = line.estimated_schedule(Time.zone.today).select {|station_id, schedule| station_id == @current_station.id}.values.first
+      if line_schedule
+        line_schedule.each do |stop_time|
+          @estimated_schedule << [stop_time, line.id]
+        end
+      end
+    end
+    @estimated_schedule.sort_by! do |elem| Moment.new(elem[0]).time end
+  end
+
   # userul schimba statia pentru care vede orarul
+  def change_current_station
+    session[:station_id] = params[:station_id]
+    redirect_to site_station_schedule_url
+  end
 
   def confirm_stop
     new_stop = Stop.new(station_id: params[:modal_station_id], line_id: params[:modal_line_id], session_id: request.session.id)

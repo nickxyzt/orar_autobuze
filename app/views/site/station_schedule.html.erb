@@ -1,1 +1,50 @@
 <%= render 'social_buttons' %>
+
+<div class="row d-flex align-items-end">
+  <div class="col col-8">
+    <%= form_tag :site_change_current_station do |form| %>
+      <%= select_tag :station_id, options_for_select(Station.order(:name).map {|station| [station.name, station.id]}, @current_station.id),
+        class: 'form-select', onchange: 'this.form.submit()' %>
+    <% end %>
+  </div>
+</div>
+
+<% if @error_message %>
+  <div class="alert alert-danger"><%= @error_message %></div>
+<% else %>
+  Orar orientativ <%= Time.zone.today.strftime("%d-%m-%Y") %>
+  <span class="badge bg-primary"><%= @today_kind_long_name %></span>
+
+  <% if @related_stations.size > 1 %>
+    <br>
+    Vezi orarul și pentru
+    <% @related_stations.each do |station| %>
+      <% if station != @current_station %>
+        <%= link_to site_station_schedule_url(station), class: 'btn btn-secondary btn-sm' do %>
+          <i class="bi bi-shop-window"></i>
+          <%= station.name %>
+        <% end %>
+      <% end %>
+    <% end %>
+  <% end %>
+
+  <div class="table mb-0">
+    <table class="table table-hover table-sm caption-top table-responsive mb-0">
+      <tr>
+        <th class="text-left bg-success" style="position: sticky; top: 0; z-index: 2; border-bottom: 0;">Momente <i class="bi bi-clock-fill"></i></th>
+        <th class="text-left bg-success" style="position: sticky; top: 0; left: 0; z-index: 3; border: 0;">Linii <i class="bi bi-bus-front"></i></th>
+      </tr>
+    </table>
+  </div>
+
+  <div>
+    <table class="table table-striped">
+      <% @estimated_schedule.each do |schedule| %>
+        <tr>
+          <td><%= schedule[0] %></td>
+          <td><%= Line.find(schedule[1]).name %></td>
+        </tr>
+      <% end %>
+    </table>
+  </div>
+<% end %>

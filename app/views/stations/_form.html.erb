@@ -23,7 +23,7 @@
 
   <div id="master_station_field" style="display: block">
     <%= form.label :master_station_id, style: "display: block" %>
-    <%= form.select :master_station_id, [['<ea însăși>', 'self']] + Station.all.map { |station| [station.name, station.id] }, { selected: @station.master_station_id } %>
+    <%= form.select :master_station_id, [['<ea însăși>', 'self']] + Station.order(:name).map { |station| [station.name, station.id] }, { selected: @station.master_station_id } %>
   </div>
 
   <div>
