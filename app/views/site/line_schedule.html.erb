@@ -3,7 +3,7 @@
 <div class="row d-flex align-items-end">
   <div class="col col-8">
     <%= form_tag :site_change_current_line do |form| %>
-      <%= select_tag :line_id, options_for_select(Line.order(:name).map {|line| ["#{line.name} #{line.description}", line.id]}, @current_line.id),
+      <%= select_tag :line_id, options_for_select(Line.order(:priority).map {|line| ["#{line.name} #{line.description}", line.id]}, @current_line.id),
         class: 'form-select', onchange: 'this.form.submit()' %>
     <% end %>
   </div>

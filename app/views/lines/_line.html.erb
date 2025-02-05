@@ -10,6 +10,11 @@
   </p>
 
   <p>
+    <strong>Priority:</strong>
+    <%= line.priority %>
+  </p>
+
+  <p>
     <strong>Station list:</strong>
     <%= line.stations.map {|station| station.name}.join(', ') %>
   </p>

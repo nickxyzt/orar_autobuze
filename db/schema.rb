@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2025_01_14_083652) do
+ActiveRecord::Schema[7.0].define(version: 2025_02_05_115749) do
   create_table "lines", force: :cascade do |t|
     t.string "name"
     t.text "station_list"
@@ -20,6 +20,7 @@ ActiveRecord::Schema[7.0].define(version: 2025_01_14_083652) do
     t.integer "time_threshold", default: 10
     t.text "times_table"
     t.date "modified_at"
+    t.integer "priority", default: 0
   end
 
   create_table "sessions", force: :cascade do |t|

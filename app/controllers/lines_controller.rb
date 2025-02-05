@@ -4,7 +4,7 @@ class LinesController < ApplicationController
 
   # GET /lines or /lines.json
   def index
-    @lines = Line.order(:name)
+    @lines = Line.order(:priority)
   end
 
   # GET /lines/1 or /lines/1.json
@@ -68,7 +68,7 @@ class LinesController < ApplicationController
 
     # Only allow a list of trusted parameters through.
     def line_params
-      params.require(:line).permit(:name, :description, :station_list, :time_threshold, :modified_at).tap do |whitelisted|
+      params.require(:line).permit(:name, :description, :station_list, :time_threshold, :modified_at, :priority).tap do |whitelisted|
         whitelisted[:station_list] = whitelisted[:station_list].split(',').map(&:to_i)
       end
     end
