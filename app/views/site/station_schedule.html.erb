@@ -46,7 +46,9 @@
             <% end %>
           </td>
           <td style="background-color: <%= line.html_color %>">
-            &#8594; <%= Station.find(schedule[2]).display_name if schedule[2] %>
+            <% if schedule[2] %>
+              <i class="bi bi-forward"></i> <%= Station.find(schedule[2]).display_name %>
+            <% end %>
           </td>
         </tr>
       <% end %>
