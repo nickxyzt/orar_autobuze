@@ -74,20 +74,33 @@ class SiteController < ApplicationController
     today_kind_name       = SpecialDay.new(kind_id: today_kind_id).kind_name
     @today_kind_long_name = SpecialDay.new(kind_id: today_kind_id).kind_long_name
 
-    # Array cu elemente [stop_time, line_id], exemplu: [["08:00", 5], ["09:00", 5], ["09:10", 6] ...]
+    # Array cu elemente [stop_time, line_id, next_checkpoint_station_id], 
+    # exemplu: [["08:00", 5, 12], ["09:00", 5, 12], ["09:10", 6, 14] ...]
     @estimated_schedule = []
     Line.all.each do |line| 
       station_list    = line.station_list
       # Indexurile statiei in aceasta linie
       station_indexes = station_list.each_index.select {|index| station_list[index] == @current_station.id}
       line_schedule   = line.estimated_schedule(Time.zone.today)
+      special_station_indexes = line.special_station_indexes(Time.zone.today)
       # Doar daca linia circula in aceasta zi!
       if line_schedule
         courses_count   = line_schedule[0].size
         # Luam toate aparitiile statiei in fiecare cursa
         courses_count.times do |index_course|
           station_indexes.each do |index_station|
-            @estimated_schedule << [ line_schedule[index_station][index_course], line.id]
+            # Identificare urmatorul punct "checkpoint" de pe traseu
+            remaining_special_station_indexes = special_station_indexes.select do |i|
+              i > index_station
+            end
+            if remaining_special_station_indexes.size > 0
+              # Ar trebui .first, dar .min e mai sigur
+              next_checkpoint_station_id = station_list[remaining_special_station_indexes.min]
+            else
+              next_checkpoint_station_id = nil
+            end
+            @estimated_schedule << [ line_schedule[index_station][index_course], 
+                                     line.id, next_checkpoint_station_id ]
           end
         end
       end

@@ -28,25 +28,25 @@
     <% end %>
   <% end %>
 
-  <div class="table mb-0">
+  <div class="table mb-0 table-sm">
     <table class="table table-hover table-sm caption-top table-responsive mb-0">
       <tr>
-        <th class="text-left bg-success" style="position: sticky; top: 0; z-index: 2; border-bottom: 0;">Momente <i class="bi bi-clock-fill"></i></th>
-        <th class="text-left bg-success" style="position: sticky; top: 0; left: 0; z-index: 3; border: 0;">Linii <i class="bi bi-bus-front"></i></th>
+        <th class="text-center bg-success" style="position: sticky; top: 0; z-index: 2; border-bottom: 0;">Moment <i class="bi bi-clock-fill"></i></th>
+        <th class="text-center bg-success" style="position: sticky; top: 0; left: 0; z-index: 3; border: 0;">Linie <i class="bi bi-bus-front"></i></th>
+        <th class="text-left bg-success" style="position: sticky; top: 0; left: 0; z-index: 3; border: 0;">Direcție <i class="bi bi-forward"></i></th>
       </tr>
-    </table>
-  </div>
 
-  <div>
-    <table class="table table-sm">
       <% @estimated_schedule.each do |schedule| %>
         <% line = Line.find(schedule[1]) %>
         <tr>
-          <td style="background-color: <%= line.html_color %>"><%= schedule[0] %></td>
-          <td style="background-color: <%= line.html_color %>">
+          <td style="background-color: <%= line.html_color %>" class="text-center"><%= schedule[0] %></td>
+          <td style="background-color: <%= line.html_color %>" class="text-center">
             <%= link_to site_line_schedule_url(line.id), class: 'btn btn-outline-dark btn-sm' do %>
               <%= line.name %> <%= line.description %>
             <% end %>
+          </td>
+          <td style="background-color: <%= line.html_color %>">
+            &#8594; <%= Station.find(schedule[2]).display_name if schedule[2] %>
           </td>
         </tr>
       <% end %>
