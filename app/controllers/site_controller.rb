@@ -28,31 +28,24 @@ class SiteController < ApplicationController
   end
 
   def line_schedule
-    session[:line_id] = params[:id] if params[:id]
-    session[:line_id] ||= Line.first.id
-    @current_line         = Line.find(session[:line_id])
-    today_kind_id         = SpecialDay.kind_id_of(Time.zone.today)
-    today_kind_name       = SpecialDay.new(kind_id: today_kind_id).kind_name
-    @today_kind_long_name = SpecialDay.new(kind_id: today_kind_id).kind_long_name
+    begin
+      session[:line_id]   = params[:id] if params[:id]
+      session[:line_id] ||= Line.first.id
+      @current_line       = Line.find(session[:line_id])
+    rescue
+      # Daca intre timp stergem linia din BD
+      session[:line_id] = Line.first.id
+      @current_line     = Line.find(session[:line_id])
+    end
+    @estimated_schedule   = @current_line.estimated_schedule(Time.zone.today)
 
     # Daca circula in astfel de zile
-    if @current_line.times_table[today_kind_name]
-      @estimated_schedule   = @current_line.estimated_schedule(Time.zone.today)
-      @courses_count        = @estimated_schedule.first[1].size
-      @stations_ids         = @current_line.station_list
-      # Reprezinta un Hash cu orele fixe din baza de date
-      today_times_table = {}
-      @current_line.times_table[today_kind_name][1].each do |key, value|
-        # inlocuim cuvintele "start" si "end" cu id-urile statiilor
-        case key
-        when "start"
-          key = @stations_ids[0]
-        when "end"
-          key = @stations_ids[-1]
-        end
-        today_times_table[key] = value
-      end
-      @special_stations_ids = today_times_table.keys
+    if @estimated_schedule
+      today_kind_id             = SpecialDay.kind_id_of(Time.zone.today)
+      today_kind_name           = SpecialDay.new(kind_id: today_kind_id).kind_name
+      @today_kind_long_name     = SpecialDay.new(kind_id: today_kind_id).kind_long_name
+      @courses_count            = @estimated_schedule.first.size
+      @special_station_indexes  = @current_line.special_station_indexes(Time.zone.today)
     else
       @error_message = "Linia #{@current_line.name} nu circulă în această zi!"
     end
@@ -66,22 +59,36 @@ class SiteController < ApplicationController
 
   # orarul pe o anumita statie
   def station_schedule
-    session[:station_id] = params[:id] if params[:id]
-    session[:station_id] ||= Station.first.id
+    begin
+      session[:station_id]   = params[:id] if params[:id]
+      session[:station_id] ||= Station.first.id
+      @current_station       = Station.find(session[:station_id])
+    rescue
+      # Daca intre timp stergem linia din BD
+      session[:station_id] = Station.first.id
+      @current_station     = Station.find(session[:station_id])
+    end
 
-    @current_station      = Station.find(session[:station_id])
     @related_stations     = Station.where(master_station_id: @current_station.master_station_id)
     today_kind_id         = SpecialDay.kind_id_of(Time.zone.today)
     today_kind_name       = SpecialDay.new(kind_id: today_kind_id).kind_name
     @today_kind_long_name = SpecialDay.new(kind_id: today_kind_id).kind_long_name
 
-    # Array cu elemente [stop_time, station_id], exemplu: [["08:00", 5], ["09:00", 5], ["09:10", 6] ...]
+    # Array cu elemente [stop_time, line_id], exemplu: [["08:00", 5], ["09:00", 5], ["09:10", 6] ...]
     @estimated_schedule = []
     Line.all.each do |line| 
-      line_schedule = line.estimated_schedule(Time.zone.today).select {|station_id, schedule| station_id == @current_station.id}.values.first
+      station_list    = line.station_list
+      # Indexurile statiei in aceasta linie
+      station_indexes = station_list.each_index.select {|index| station_list[index] == @current_station.id}
+      line_schedule   = line.estimated_schedule(Time.zone.today)
+      # Doar daca linia circula in aceasta zi!
       if line_schedule
-        line_schedule.each do |stop_time|
-          @estimated_schedule << [stop_time, line.id]
+        courses_count   = line_schedule[0].size
+        # Luam toate aparitiile statiei in fiecare cursa
+        courses_count.times do |index_course|
+          station_indexes.each do |index_station|
+            @estimated_schedule << [ line_schedule[index_station][index_course], line.id]
+          end
         end
       end
     end

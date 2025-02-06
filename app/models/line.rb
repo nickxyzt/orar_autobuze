@@ -13,51 +13,83 @@ class Line < ApplicationRecord
     station_list.map { |id| stations.find { |station| station.id == id } }
   end
 
-  # programul estimativ al curselor, calculat!
-  # Un hash de tipul {1 => ["06:00", ...], 7 => ["08:00", ...]}
-  def estimated_schedule(day)
+  # Daca circula in aceasta zi
+  # TODO de implementat conditia cand circula in cursul saptamanii,
+  # dar nu joia, de exemplu
+  def circulates_at?(day)
     day_kind_id = SpecialDay.kind_id_of(day)
     day_kind_name = SpecialDay.new(kind_id: day_kind_id).kind_name
-    # Poulam intai hash-ul cu orele fixe din baza de date
-    day_estimate_table = {}
-    self.times_table[day_kind_name][1].each do |key, value|
-      # inlocuim cuvintele "start" si "end" cu id-urile statiilor
-      case key
-      when "start"
-        key = self.station_list[0]
-      when "end"
-        key = self.station_list[-1]
-      end
-      day_estimate_table[key] = value
-    end
-    special_stations_ids = day_estimate_table.keys
-    stations_ids         = self.station_list
-    nr_of_courses        = day_estimate_table.values.first.size
+    return !times_table[day_kind_name].nil?
+  end
 
-    stations_ids.each do |station_id|
-      day_estimate_table[station_id] ||= []
-    end
-    
-    # nr de curse
-    nr_of_courses.times do |index_course|
-      # Statiile speciale: start, checkpoint, end
-      special_stations_ids.each_with_index do |station_id, index_station|
-        if index_station < special_stations_ids.count - 1
-          station_start_id    = station_id
-          station_end_id      = special_stations_ids[index_station+1]
-          station_start_index = stations_ids.index(station_start_id)
-          station_end_index   = stations_ids.index(station_end_id)
-          intermediary_stations_ids = stations_ids[station_start_index .. station_end_index]
-          # Obtinem momentele estimate pentru statiile intermediare
-          new_moments = Moment.split(day_estimate_table[station_start_id][index_course], day_estimate_table[station_end_id][index_course], intermediary_stations_ids.count)
-          # Le introducem in Hash, fara capetele Array-ului cu momentele noi
-          intermediary_stations_ids[1..-2].each_with_index do |station_id, index|
-            day_estimate_table[station_id] << new_moments[index]
+  # Programul estimativ al curselor, calculat!
+  # Un Array de Array {["06:00", ...], ["08:00", ...], ...}
+  # reprezentand orele pentru fiecare statie in parte,
+  # in functie de POZITIA ei in station_list
+  # NU se poate folosi un Hash deoarece 
+  # aceeasi statie (Spital) apare de 2 ori la aceeasi cursa (3A)!
+  def estimated_schedule(day)
+    if circulates_at? day
+      day_kind_id             = SpecialDay.kind_id_of(day)
+      day_kind_name           = SpecialDay.new(kind_id: day_kind_id).kind_name
+      # Populam cu array-uri goale
+      day_estimate_table      = Array.new(station_list.size) {[]}
+      # Luam pozitiile statiilor speciale
+      special_station_indexes = self.special_station_indexes(Time.zone.today)
+
+      # Populam cu orele fixe din baza de date
+      index = 0
+      self.times_table[day_kind_name][1].each do |key, value|
+        day_estimate_table[special_station_indexes[index]] = value
+        index += 1
+      end
+
+      # nr de curse
+      nr_of_courses = day_estimate_table[0].size
+      nr_of_courses.times do |index_course|
+        # Pornim de la statiile care au deja orarul cunoscut (cele speciale)
+        special_station_indexes.each_with_index do |index_station, i|
+          # Pentru ultima statie nu avem "urmatoarea"
+          if index_station != special_station_indexes[-1]
+            station_start_index = index_station
+            station_end_index   = special_station_indexes[i+1]
+            intermediary_station_indexes = (station_start_index..station_end_index).to_a
+            # Obtinem momentele estimate pentru statiile intermediare
+            new_moments = Moment.split(day_estimate_table[station_start_index][index_course], day_estimate_table[station_end_index][index_course], intermediary_station_indexes.count)
+            # Le introducem in Hash, fara capetele Array-ului cu momentele noi
+            intermediary_station_indexes[1..-2].each_with_index do |station_index, j|
+              day_estimate_table[station_index] << new_moments[j]
+            end
           end
         end
       end
-    end
 
-    return day_estimate_table
+      return day_estimate_table
+    else
+      # Autobuzul nu circula in aceasta zi
+      return nil
+    end
+  end
+
+  # Indexurile liniilor speciale dintr-o zi
+  def special_station_indexes(day)
+    if circulates_at? day
+      day_kind_id = SpecialDay.kind_id_of(day)
+      day_kind_name = SpecialDay.new(kind_id: day_kind_id).kind_name
+      indexes = []
+      
+      self.times_table[day_kind_name][1].each do |key, value|
+        # inlocuim cuvintele "start" si "end" cu index-urile statiilor
+        case key
+        when "start"
+          indexes << 0 
+        when "end"
+          indexes << self.station_list.size - 1
+        else
+          indexes << key
+        end
+      end
+      indexes
+    end
   end
 end
