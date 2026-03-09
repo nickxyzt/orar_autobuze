@@ -43,12 +43,12 @@
 
   <div>
     <%= form.label :station_list, style: "display: block" %>
-    <%= form.text_area :station_list, value: line.station_list.join(', ') %>
+    <%= form.text_area :station_list, value: line.station_list.join(', '), style: "width: 600px" %>
   </div>
 
   <div>
     <%= form.label :times_table, style: "display: block" %>
-    <%= form.text_area :times_table, value: line.times_table %>
+    <%= form.text_area :times_table, value: line.times_table, style: "width: 600px; height: 200px" %>
   </div>
 
   <div>

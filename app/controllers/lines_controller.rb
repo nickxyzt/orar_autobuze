@@ -60,6 +60,30 @@ class LinesController < ApplicationController
     end
   end
 
+  # Verificare program (schedules)
+  def check_all_schedules
+    @results = [] # Aici colectam timpii gresiti
+    Line.all.each do |line|
+      # Obtinem un Hash de tipul {"start"=> ["04:30", "05:00"], 6 => ["05:00", "06:00"]}, "end" => ["05:30", "06:30"]}
+      schedule = line[:times_table]["working"][1]
+
+      keys   = schedule.keys   # statiile "cheie"
+      values = schedule.values # timpii de sosire in statiile "cheie"
+
+      # Parcurgem valorile pentru fiecare timp de plecare si vedem daca sunt ordonate alfanumeric
+      values.first.count.times do |index|
+        this_time_values = []
+        keys.each do |key|
+          this_time_values << schedule[key][index]
+        end
+        if this_time_values != this_time_values.sort
+          @results << "Linia #{line.name} are gresit timpii #{this_time_values}"
+        end
+      end
+
+    end
+  end
+
   private
     # Use callbacks to share common setup or constraints between actions.
     def set_line
