@@ -42,8 +42,8 @@
           <td style="backgro1und-color: <%= line.html_color %>" class="text-center"><%= schedule[0] %></td>
           <td style="backgro1und-color: <%= line.html_color %>" class="text-left">
             <%= link_to site_line_schedule_url(line.id), class: 'btn btn-outline-dark btn-sm', 
-              style: "background-color: #{line.html_color}", data: { turbo: false } do %>
-              <span class="badge text-bg-success"><%= line.name %></span> <%= line.description %>
+              style: "background-color: #f2f3dd", data: { turbo: false } do %>
+              <span class="badge" style="background-color: <%= line.html_color %>"><%= line.name %></span> <%= line.description %>
             <% end %>
           </td>
           <td style="bac1kground-color: <%= line.html_color %>">
