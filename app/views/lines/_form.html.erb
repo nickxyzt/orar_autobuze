@@ -1,4 +1,4 @@
-<%= form_with(model: line) do |form| %>
+<%= form_with(model: line, data: { turbo: false }) do |form| %>
   <% if line.errors.any? %>
     <div style="color: red">
       <h2><%= pluralize(line.errors.count, "error") %> prohibited this line from being saved:</h2>
@@ -32,6 +32,27 @@
   </div>
 
   <div>
+    <%= form.hidden_field :station_list, value: line.station_list.join(', '), style: "width: 600px" %>
+  </div>
+
+  <div id="station_selector">
+    <% all_stations = Hash[Station.order(:name).map {|station| [station.name, station.id]}] %>
+    <% line.station_list.each_with_index do |station_id, index| %>
+      <div>
+        <%# punem index * 10 sa fie ceva, nu ne intereseaza exact valoarea %>
+        <%= button_tag "+", type: "button", onclick: "addStation(this.parentElement)" %>
+        <%= select_tag "station_index_#{index * 10}", options_for_select(all_stations, station_id) %>
+        <%= button_tag "X", type: "button", onclick: "removeStation(this.parentElement)" %>
+      </div>
+    <% end %>
+  </div>
+
+  <div>
+    <%= form.label :info, style: "display: block" %>
+    <%= form.text_area :info, value: line.info, style: "width: 600px" %>
+  </div>
+
+  <div>
     <%= form.label :modified_at, style: "display: block" %>
     <%= form.date_field :modified_at %>
   </div>
@@ -39,11 +60,6 @@
   <div>
     <%= form.label :time_threshold, style: "display: block" %>
     <%= form.text_field :time_threshold %>
-  </div>
-
-  <div>
-    <%= form.label :station_list, style: "display: block" %>
-    <%= form.text_area :station_list, value: line.station_list.join(', '), style: "width: 600px" %>
   </div>
 
   <div>
@@ -55,3 +71,31 @@
     <%= form.submit %>
   </div>
 <% end %>
+
+<script>
+  // adaugare statie
+  function addStation(elem) {
+    const clone = elem.cloneNode(true);
+    elem.parentElement.insertBefore(clone, elem);
+  }
+
+  // eliminare statie
+  function removeStation(elem) {
+    const nr_frati = elem.parentElement.children.length - 2;
+    if (nr_frati > 0)
+      elem.remove()
+    else
+      alert('In lista trebuie sa existe cel putin 2 statii')
+  }
+
+  const form = document.querySelector("form");
+  form.addEventListener('submit', function(event) {
+    // luam statiile din comboboxuri si cream un Array
+    let station_list = []
+    document.querySelectorAll('#station_selector [id^="station_index_"]').forEach(child => {
+      station_list.push(child.value)
+    });
+    // actualizam lista statiilor ca si camp al form-ului
+    document.getElementById("line_station_list").value = station_list.join(", ")
+  });
+</script>

@@ -14,6 +14,16 @@ class LinesController < ApplicationController
   # GET /lines/new
   def new
     @line = Line.new
+    @line.modified_at = Date.today
+    if Station.all.count == 1
+      # Daca avem o singura statie
+      @line.station_list = [Station.first.id, Station.first.id]
+    elsif Station.all.count >= 2
+      # Luam 2 statii la intamplare
+      @line.station_list = [Station.first.id, Station.last.id]
+    else
+      # Aici ar trebui ceva pentru cazul cand nu avem statii in lista...
+    end
   end
 
   # GET /lines/1/edit
@@ -92,7 +102,7 @@ class LinesController < ApplicationController
 
     # Only allow a list of trusted parameters through.
     def line_params
-      params.require(:line).permit(:name, :description, :station_list, :time_threshold, :modified_at, :priority, :html_color).tap do |whitelisted|
+      params.require(:line).permit(:name, :description, :priority, :html_color, :station_list, :info, :modified_at, :time_threshold).tap do |whitelisted|
         whitelisted[:station_list] = whitelisted[:station_list].split(',').map(&:to_i)
       end
     end
