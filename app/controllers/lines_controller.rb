@@ -36,7 +36,7 @@ class LinesController < ApplicationController
 
   # POST /lines or /lines.json
   def create
-    times_table_hash = Line::EXAMPLE_TIMES_TABLE # un orar valid dar foarte simplu
+    times_table_hash = {"working" => [[1,2,3,4,5], []], "holiday" => [[0,6], []]} # un orar valid dar foarte simplu
     @line = Line.new(line_params.merge(times_table: times_table_hash))
 
     respond_to do |format|
@@ -86,7 +86,7 @@ class LinesController < ApplicationController
       schedule_holiday_special = JSON.parse(params["schedule_holiday_special"])
 
       # informatiile primite sunt in format de tipul:
-      # [["start", ["07:15", "08:15", "09:15"]], ["end", ["08:00", "09:00", "10:00"]]]
+      # [[0, ["07:15", "08:15", "09:15"]], [15, ["08:00", "09:00", "10:00"]]]
       schedule_working.each do |row|
         times_table["working"][1][row[0]] = row[1]
       end
@@ -120,7 +120,7 @@ class LinesController < ApplicationController
   def check_all_schedules
     @results = [] # Aici colectam timpii gresiti
     Line.all.each do |line|
-      # Obtinem un Hash de tipul {"start"=> ["04:30", "05:00"], 6 => ["05:00", "06:00"]}, "end" => ["05:30", "06:30"]}
+      # Obtinem un Hash de tipul {0 => ["04:30", "05:00"], 6 => ["05:00", "06:00"]}, 15 => ["05:30", "06:30"]}
       schedule = line[:times_table]["working"][1]
 
       keys   = schedule.keys   # statiile "cheie"

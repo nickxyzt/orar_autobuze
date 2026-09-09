@@ -50,7 +50,7 @@ class SiteController < ApplicationController
       @error_message = "Linia #{@current_line.name} nu circulă în această zi!"
     else
       @courses_count            = @estimated_schedule.first.size
-      @special_station_indexes  = @current_line.special_station_indexes(Time.zone.today)
+      @special_station_indexes  = @current_line.special_station_indexes(Time.zone.today, 0) # Luam statiile speciale ale primei curse
     end
   end
 
@@ -85,7 +85,7 @@ class SiteController < ApplicationController
       # Indexurile statiei in aceasta linie
       station_indexes = station_list.each_index.select {|index| station_list[index] == @current_station.id}
       line_schedule   = line.estimated_schedule(Time.zone.today)
-      special_station_indexes = line.special_station_indexes(Time.zone.today)
+      special_station_indexes = line.special_station_indexes(Time.zone.today, 0)
       # Doar daca linia circula in aceasta zi!
       if line_schedule
         courses_count   = line_schedule[0].size

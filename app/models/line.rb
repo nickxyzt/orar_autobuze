@@ -3,12 +3,6 @@ class Line < ApplicationRecord
   serialize :station_list, Array
   serialize :times_table,  Hash
 
-  EXAMPLE_TIMES_TABLE = {
-    "working"=>[[1], {"start" => ["07:00"], "end" => ["08:00"]}], 
-    "holiday"=>[[6], {"start" => ["07:00"], "end" => ["08:00"]}], 
-    "holiday_special"=>[nil, {}] # fara program de sarbatori speciale
-  }
-
   validates_uniqueness_of :name
   validates_presence_of :times_table, :time_threshold, :name, :description, :station_list, :modified_at
   has_many :stops
@@ -38,24 +32,30 @@ class Line < ApplicationRecord
     if circulates_at? day
       day_kind_id             = SpecialDay.kind_id_of(day)
       day_kind_name           = SpecialDay.new(kind_id: day_kind_id).kind_name.to_s
-      # Populam cu array-uri goale
+      # Ne folosim de orele de start ale curselor - ele trebuie sa existe obligatoriu la toate cursele
+      start_timetable         = self.times_table[day_kind_name][1].first[1]
+      # Populam cu array-uri goale pentru fiecare STATIE
       day_estimate_table      = Array.new(station_list.size) {[]}
-      # Luam pozitiile statiilor speciale
-      special_station_indexes = self.special_station_indexes(Time.zone.today)
-
-      # Populam cu orele fixe din baza de date
-      index = 0
-      self.times_table[day_kind_name][1].each do |key, value|
-        day_estimate_table[special_station_indexes[index]] = value
-        index += 1
-      end
 
       # nr de curse
-      nr_of_courses = day_estimate_table[0].size
+      nr_of_courses = start_timetable.size
       nr_of_courses.times do |index_course|
+
+        # Luam pozitiile statiilor speciale
+        special_station_indexes = self.special_station_indexes(Time.zone.today, index_course)
+
+        # Populam cu orele fixe din baza de date
+        index = 0
+        self.times_table[day_kind_name][1].each do |key, value|
+          unless value[index_course].blank? # daca avem ora fixa in aceasta statie pe aceasta cursa
+            day_estimate_table[special_station_indexes[index]] << value[index_course]
+            index += 1
+          end
+        end
+
         # Pornim de la statiile care au deja orarul cunoscut (cele speciale)
         special_station_indexes.each_with_index do |index_station, i|
-          # Pentru ultima statie nu avem "urmatoarea"
+          # Pentru ultima statie nu avem si pe "urmatoarea"
           if index_station != special_station_indexes[-1]
             station_start_index = index_station
             station_end_index   = special_station_indexes[i+1]
@@ -63,6 +63,7 @@ class Line < ApplicationRecord
             # Obtinem momentele estimate pentru statiile intermediare
             new_moments = Moment.split(day_estimate_table[station_start_index][index_course], day_estimate_table[station_end_index][index_course], intermediary_station_indexes.count)
             # Le introducem in Hash, fara capetele Array-ului cu momentele noi
+            puts "Index cursa: #{index_course}, Statii intermediare: #{intermediary_station_indexes}"
             intermediary_station_indexes[1..-2].each_with_index do |station_index, j|
               day_estimate_table[station_index] << new_moments[j]
             end
@@ -77,21 +78,19 @@ class Line < ApplicationRecord
     end
   end
 
-  # Indexurile liniilor speciale dintr-o zi
-  def special_station_indexes(day)
+  # Indexurile liniilor speciale dintr-o zi - pe o anumita cursa!
+  def special_station_indexes(day, course_index)
     if circulates_at? day
       day_kind_id = SpecialDay.kind_id_of(day)
       day_kind_name = SpecialDay.new(kind_id: day_kind_id).kind_name.to_s
       indexes = []
       
       self.times_table[day_kind_name][1].each do |key, value|
-        # inlocuim cuvintele "start" si "end" cu index-urile statiilor
-        case key
-        when "start"
-          indexes << 0 
-        when "end"
-          indexes << self.station_list.size - 1
-        else
+        # pentru cazurile cand avem ore la o anumita statie
+        # verificam sa avem si pe cursa curenta!
+        # E posibil sa avem ore stabilite fixe doar pentru anumite curse ale liniei
+        unless value[course_index].blank?
+          # exista ora prestabilita pentru aceasta cursa, deci o luam
           indexes << key
         end
       end

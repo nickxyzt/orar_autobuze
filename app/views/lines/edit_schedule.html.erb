@@ -51,7 +51,7 @@
 
       <%# Cream coloane pentru fiecare timp din schedule %>
       <% if @line.times_table[day_kind] and !@line.times_table[day_kind][1].blank? %>
-        <% @line.times_table[day_kind][1]["start"].size.times do |count| %>
+        <% @line.times_table[day_kind][1][0].size.times do |count| %>
           <div class="coloana">
             <div>
               <button type="button", class='btn btn-danger', onclick="removeColumn(this.parentElement.parentElement)">
@@ -61,8 +61,6 @@
             </div>
             <%# Timpul in fiecare statie %>
             <% @line.station_list.each_with_index do |station_id, station_index| %>
-              <% station_index = "start" if station_index == 0 %>
-              <% station_index = "end"   if station_index == @line.station_list.count - 1 %>
 
               <%# Daca exista in orar acest timp %>
               <% if @line.times_table[day_kind][1][station_index] %>
@@ -95,11 +93,9 @@
 <script>
 
   const station_count = <%= @line.station_list.count %>;
-  // pentru fiecare statie ("start", "end" sau index) cream un Array cu momentele
+  // pentru fiecare statie cream un Array cu momentele
   // pornim de la un array cu statiile
   const array_stations = Array.from({ length: station_count }, (_, i) => i);
-  array_stations[0]  = "start"
-  array_stations[station_count - 1] = "end"
 
   // Inainte de trimitere formular, prelucram datele din campuri
   const form = document.querySelector("form");
