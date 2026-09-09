@@ -3,6 +3,12 @@ class Line < ApplicationRecord
   serialize :station_list, Array
   serialize :times_table,  Hash
 
+  EXAMPLE_TIMES_TABLE = {
+    "working"=>[[1], {"start" => ["07:00"], "end" => ["08:00"]}], 
+    "holiday"=>[[6], {"start" => ["07:00"], "end" => ["08:00"]}], 
+    "holiday_special"=>[nil, {}] # fara program de sarbatori speciale
+  }
+
   validates_uniqueness_of :name
   validates_presence_of :times_table, :time_threshold, :name, :description, :station_list, :modified_at
   has_many :stops

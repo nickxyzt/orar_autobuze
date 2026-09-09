@@ -11,7 +11,9 @@ Rails.application.routes.draw do
   resources :special_days
   resources :stations
   resources :lines do
-    get 'check_all_schedules', on: :collection
+    get  'edit_schedule', on: :member
+    post 'update_schedule', on: :member
+    get  'check_all_schedules', on: :collection
   end
   resources :stops
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html

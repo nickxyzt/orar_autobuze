@@ -16,13 +16,9 @@
 
 <% unless @current_line.info.blank? %>
   <div>
-    Observații: <%= @current_line.info %>
+    Ultima modificare: <%= @current_line.modified_at.strftime("%d-%m-%Y") %>. <%= @current_line.info %>
   </div>
 <% end %>
-
-<div>
-  Ultima actualizare: <%= @current_line.modified_at.strftime("%d-%m-%Y") %>
-</div>
 
 <% if @error_message %>
   <div class="alert alert-danger"><%= @error_message %></div>

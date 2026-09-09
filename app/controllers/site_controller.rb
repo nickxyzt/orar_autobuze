@@ -37,17 +37,20 @@ class SiteController < ApplicationController
       session[:line_id] = Line.first.id
       @current_line     = Line.find(session[:line_id])
     end
-    @estimated_schedule   = @current_line.estimated_schedule(Time.zone.today)
 
-    # Daca circula in astfel de zile
-    if @estimated_schedule
-      today_kind_id             = SpecialDay.kind_id_of(Time.zone.today)
-      today_kind_name           = SpecialDay.new(kind_id: today_kind_id).kind_name
-      @today_kind_long_name     = SpecialDay.new(kind_id: today_kind_id).kind_long_name
+    # Informatiile despre ziua curenta
+    today_kind_id             = SpecialDay.kind_id_of(Time.zone.today)
+    today_kind_name           = SpecialDay.new(kind_id: today_kind_id).kind_name
+    @today_kind_long_name     = SpecialDay.new(kind_id: today_kind_id).kind_long_name
+
+    # Luam orarul pentru ziua curenta
+    @estimated_schedule   = @current_line.estimated_schedule(Time.zone.today)
+    if @estimated_schedule.blank? or @estimated_schedule[1].blank?
+      # Verificam daca circula in aceasta zi
+      @error_message = "Linia #{@current_line.name} nu circulă în această zi!"
+    else
       @courses_count            = @estimated_schedule.first.size
       @special_station_indexes  = @current_line.special_station_indexes(Time.zone.today)
-    else
-      @error_message = "Linia #{@current_line.name} nu circulă în această zi!"
     end
   end
 

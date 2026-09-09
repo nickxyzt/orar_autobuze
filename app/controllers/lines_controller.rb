@@ -1,6 +1,6 @@
 class LinesController < ApplicationController
 
-  before_action :set_line, only: %i[ show edit update destroy ]
+  before_action :set_line, only: %i[ show edit edit_schedule update update_schedule destroy ]
 
   # GET /lines or /lines.json
   def index
@@ -30,9 +30,13 @@ class LinesController < ApplicationController
   def edit
   end
 
+  # GET /lines/1/edit_schedule
+  def edit_schedule
+  end
+
   # POST /lines or /lines.json
   def create
-    times_table_hash = eval(params[:line][:times_table]).to_h
+    times_table_hash = Line::EXAMPLE_TIMES_TABLE # un orar valid dar foarte simplu
     @line = Line.new(line_params.merge(times_table: times_table_hash))
 
     respond_to do |format|
@@ -48,14 +52,56 @@ class LinesController < ApplicationController
 
   # PATCH/PUT /lines/1 or /lines/1.json
   def update
-    times_table_hash = eval(params[:line][:times_table]).to_h
     respond_to do |format|
-      if @line.update(line_params.merge(times_table: times_table_hash))
+      if @line.update(line_params)
         format.html { redirect_to lines_url, notice: "Line was successfully updated." }
         format.json { render :show, status: :ok, location: @line }
       else
         format.html { render :edit, status: :unprocessable_entity }
         format.json { render json: @line.errors, status: :unprocessable_entity }
+      end
+    end
+  end
+
+  # PATCH/PUT /lines/1/update_schedule
+  def update_schedule
+    respond_to do |format|
+      # construire manuala a orarului
+      times_table = {}
+      ["working", "holiday"].each do |day_kind|
+        times_table[day_kind] = [[],{}]
+        (0..6).each do |day_index|
+          if params["ck_#{day_kind}_#{day_index}"]
+            times_table[day_kind][0] << day_index
+          end
+        end
+      end
+      # pentru holiday_special nu bifam zilele saptamanii
+      times_table["holiday_special"] = [nil, {}]
+
+      # adaugam momentele si timpii
+      # convertim intai params in array de array
+      schedule_working = JSON.parse(params["schedule_working"])
+      schedule_holiday = JSON.parse(params["schedule_holiday"])
+      schedule_holiday_special = JSON.parse(params["schedule_holiday_special"])
+
+      # informatiile primite sunt in format de tipul:
+      # [["start", ["07:15", "08:15", "09:15"]], ["end", ["08:00", "09:00", "10:00"]]]
+      schedule_working.each do |row|
+        times_table["working"][1][row[0]] = row[1]
+      end
+      schedule_holiday.each do |row|
+        times_table["holiday"][1][row[0]] = row[1]
+      end
+      schedule_holiday_special.each do |row|
+        times_table["holiday_special"][1][row[0]] = row[1]
+      end
+
+      logger.info times_table
+      logger.info "a"*100
+      @line.times_table = times_table
+      if @line.save
+        format.html { redirect_to @line, notice: "Line schedule was successfully updated." }
       end
     end
   end

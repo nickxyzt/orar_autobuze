@@ -8,6 +8,7 @@
     <%= render line %>
     <div>
       <%= link_to "Edit this line", edit_line_url(line) %>
+      <%= link_to "Edit schedule", edit_schedule_line_url(line) %>
       <%= button_to "Destroy this line", line, method: :delete, form: {style: 'display: inline'} %>
     </div>
     <hr>

@@ -1,0 +1,167 @@
+<%= render partial: 'menu/menu' %>
+
+<style>
+  .schedule {
+    display: grid;
+    grid-template-columns: max-content repeat(50, 1fr);
+  }
+
+  .schedule > .coloana > div {
+    min-height: 25px;
+    box-sizing: border-box;
+}
+
+.schedule input {
+    height: 100%;
+    box-sizing: border-box;
+}
+</style>
+
+<div>
+  Editare Schedule pentru linia <%= @line.name %>
+</div>
+
+<%= form_tag update_schedule_line_path(@line, data: { turbo: false }) do %>
+  <% ["working", "holiday", "holiday_special"].each do |day_kind| %>
+    <div>
+      <div>Tip zi: <strong><%= day_kind %></strong></div>
+      <div>
+        <% if ["working", "holiday"].include? day_kind %>
+          <% (0..6).each do |day_index| %>
+            <%= check_box_tag "ck_#{day_kind}_#{day_index}", true, @line.times_table[day_kind][0].include?(day_index) %>
+            <%= I18n.t("date.day_names")[day_index] %>
+          <% end %>
+        <% end %>
+      </div>
+    </div>
+
+    <div class="schedule" name="schedule_<%= day_kind %>">
+      <div class="coloana">
+        <div>
+          <button type="button", class='btn btn-primary', onclick="addColumn(this.parentElement.parentElement.parentElement)">
+            <i class="bi bi-plus"></i>
+            Adaugă coloană
+          </button>
+        </div>
+        <%# Denumirile statiilor %>
+        <% @line.station_list.each do |station_id| %>
+          <div><%= Station.find(station_id).name%></div>
+        <% end %>
+      </div>
+
+      <%# Cream coloane pentru fiecare timp din schedule %>
+      <% if @line.times_table[day_kind] and !@line.times_table[day_kind][1].blank? %>
+        <% @line.times_table[day_kind][1]["start"].size.times do |count| %>
+          <div class="coloana">
+            <div>
+              <button type="button", class='btn btn-danger', onclick="removeColumn(this.parentElement.parentElement)">
+                <i class="bi bi-remove"></i>
+                X
+              </button>
+            </div>
+            <%# Timpul in fiecare statie %>
+            <% @line.station_list.each_with_index do |station_id, station_index| %>
+              <% station_index = "start" if station_index == 0 %>
+              <% station_index = "end"   if station_index == @line.station_list.count - 1 %>
+
+              <%# Daca exista in orar acest timp %>
+              <% if @line.times_table[day_kind][1][station_index] %>
+                <% time_value = @line.times_table[day_kind][1][station_index][count] %>
+              <% else %>
+                <% time_value = nil %>
+              <% end %>
+
+              <div>
+                <%# Casuta cu timpul %>
+                <%= text_field_tag "time_#{day_kind}_#{station_index}", time_value, size: 3 %>
+              </div>
+            <% end %>
+          </div>
+        <% end %>
+      <% end %>
+    </div>
+
+    <%# Camp hidden pentru fiecare tip de zi, care se trimit pe server %>
+    <%= hidden_field_tag "schedule_#{day_kind}" %>
+
+    <hr />
+  <% end %>
+
+  <%= submit_tag 'Update schedule' %>
+<% end %>
+
+<%= link_to 'Back', lines_path %>
+
+<script>
+
+  const station_count = <%= @line.station_list.count %>;
+  // pentru fiecare statie ("start", "end" sau index) cream un Array cu momentele
+  // pornim de la un array cu statiile
+  const array_stations = Array.from({ length: station_count }, (_, i) => i);
+  array_stations[0]  = "start"
+  array_stations[station_count - 1] = "end"
+
+  // Inainte de trimitere formular, prelucram datele din campuri
+  const form = document.querySelector("form");
+  form.addEventListener('submit', function(event) {
+    // luam schedule pentru fiecare caz in parte
+    ["working", "holiday", "holiday_special"].forEach((day_kind, index) => {
+      // cream un Map() pentru fiecare tip de zi in parte
+      const schedule_hash = new Map()
+      array_stations.forEach(station_index => {
+        const this_station_schedule = []
+        document.querySelectorAll(`[id="time_${day_kind}_${station_index}`).forEach(child => {
+          this_station_schedule.push(child.value)
+        });
+        // DEBUG alert(`${station_index} ${day_kind} ${this_station_schedule}`)
+
+        // Daca nu avem doar elemente goale pentru momentul curent,
+        // inseamna ca avem timpi setati pe acest moment
+        if (!this_station_schedule.every(x => x === ""))
+          schedule_hash.set(station_index, this_station_schedule)
+      })
+
+      // actualizam elementul din pagina, care se trimite prin params, pentru fiecare tip de zi!
+      document.getElementById(`schedule_${day_kind}`).value = JSON.stringify([...schedule_hash])
+    })
+  });
+
+  // adaugare coloana noua
+  function addColumn(scheduleElem) {
+    const day_kind = scheduleElem.getAttribute("name").replace("schedule_", "")
+    const coloana = document.createElement('div');
+    coloana.className = 'coloana';
+
+    // adaugare butonul de stergere coloana
+    const div = document.createElement('div');
+    const btn = document.createElement("button")
+    btn.type        = "button"
+    btn.textContent = "X"
+    btn.className   = "btn btn-danger"
+    btn.onclick = function() {
+      removeColumn(this.parentElement.parentElement)
+    };
+    div.appendChild(btn)
+    coloana.appendChild(div)
+
+    for (let i = 0; i < array_stations.length; i++) {
+        const div = document.createElement('div');
+
+        const input = document.createElement('input');
+        input.type = 'text';
+        input.name = `time_${day_kind}_${array_stations[i]}`;
+        input.id   = input.name // id-ul este identic cu numele
+        input.size = 3;
+
+        div.appendChild(input);
+        coloana.appendChild(div);
+    }
+
+    scheduleElem.appendChild(coloana);
+  }
+
+  // stergere coloana
+  function removeColumn(columnElem) {
+    columnElem.remove()
+  }
+</script>
