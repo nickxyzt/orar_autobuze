@@ -24,7 +24,7 @@ class Line < ApplicationRecord
   # dar nu joia, de exemplu
   def circulates_at?(day)
     day_kind_id = SpecialDay.kind_id_of(day)
-    day_kind_name = SpecialDay.new(kind_id: day_kind_id).kind_name
+    day_kind_name = SpecialDay.new(kind_id: day_kind_id).kind_name.to_s
     return !times_table[day_kind_name].nil?
   end
 
@@ -37,7 +37,7 @@ class Line < ApplicationRecord
   def estimated_schedule(day)
     if circulates_at? day
       day_kind_id             = SpecialDay.kind_id_of(day)
-      day_kind_name           = SpecialDay.new(kind_id: day_kind_id).kind_name
+      day_kind_name           = SpecialDay.new(kind_id: day_kind_id).kind_name.to_s
       # Populam cu array-uri goale
       day_estimate_table      = Array.new(station_list.size) {[]}
       # Luam pozitiile statiilor speciale
@@ -81,7 +81,7 @@ class Line < ApplicationRecord
   def special_station_indexes(day)
     if circulates_at? day
       day_kind_id = SpecialDay.kind_id_of(day)
-      day_kind_name = SpecialDay.new(kind_id: day_kind_id).kind_name
+      day_kind_name = SpecialDay.new(kind_id: day_kind_id).kind_name.to_s
       indexes = []
       
       self.times_table[day_kind_name][1].each do |key, value|
