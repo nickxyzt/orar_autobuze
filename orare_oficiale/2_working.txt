@@ -1,9 +1,0 @@
-1 6:50 7:14 7:44 Piața Gării <-> Bora
-2 10:20 10:44 11:14 Piața Gării <-> Bora
-3 12:10 12:34 12:04 Piața Gării <-> Bora
-4 13:20 13:44 14:14 Piața Gării <-> Bora
-5 14:10 14:34 15:04 Piața Gării <-> Bora
-6 15:20 15:44 16:14 Piața Gării <-> Bora
-7 17:05 17:29 17:59 Piața Gării <-> Bora
-8 18:00 18:24 18:54 Piața Gării <-> Bora
-9 19:10 19:34 20:04 Piața Gării <-> Bora
