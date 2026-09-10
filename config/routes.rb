@@ -1,4 +1,6 @@
 Rails.application.routes.draw do
+  get  'utils/get_schedule'
+  post 'utils/get_schedule'
   get '/line_schedule/(:id)', to: 'site#line_schedule', as: :site_line_schedule
   get '/station_schedule/(:id)', to: 'site#station_schedule', as: :site_station_schedule
   get 'site/dismiss_button'

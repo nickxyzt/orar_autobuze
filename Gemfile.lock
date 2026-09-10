@@ -99,6 +99,11 @@ GEM
       irb (~> 1.10)
       reline (>= 0.3.8)
     erubi (1.13.1)
+    ferrum (0.18.0)
+      addressable (~> 2.5)
+      base64 (~> 0.2)
+      concurrent-ruby (~> 1.1)
+      websocket-driver (~> 0.7)
     globalid (1.2.1)
       activesupport (>= 6.1)
     i18n (1.14.6)
@@ -253,6 +258,7 @@ DEPENDENCIES
   byebug
   capybara
   debug
+  ferrum (= 0.18.0)
   importmap-rails
   jbuilder
   pg

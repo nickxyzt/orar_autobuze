@@ -46,6 +46,7 @@
       </div>
     <% end %>
   </div>
+  Last index: <span id="last_station_index"><%= line.station_list.count - 1 %></span>
 
   <div>
     <%= form.label :times_table, style: "display: block" %>
@@ -102,5 +103,11 @@
     });
     // actualizam lista statiilor ca si camp al form-ului
     document.getElementById("line_station_list").value = station_list.join(", ")
+
+    // modificam cuvintul "last" in indexul ultimei statii din times_table
+    const last_station_index = document.getElementById("last_station_index").textContent
+    const line_times_table = document.getElementById("line_times_table")
+    line_times_table.value = line_times_table.value.replaceAll("\"last\"", last_station_index)
+
   });
 </script>
