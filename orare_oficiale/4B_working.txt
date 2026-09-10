@@ -1,0 +1,8 @@
+1 6:00 6:30 7:00 Kaufland <-> Bora
+2 9:15 9:45 10:15 Kaufland <-> Bora
+3 12:15 12:45 13:45 Kaufland <-> Bora
+4 15:15 15:45 16:15 Kaufland <-> Bora
+5 16:15 16:45 17:15 Kaufland <-> Bora
+6 17:15 17:45 18:15 Kaufland <-> Bora
+7 20:15 20:45 21:15 Kaufland <-> Bora
+8 21:15 21:45 22:15 Kaufland <-> Bora

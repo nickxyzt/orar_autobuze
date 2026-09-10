@@ -67,7 +67,7 @@ class SiteController < ApplicationController
       session[:station_id] ||= Station.first.id
       @current_station       = Station.find(session[:station_id])
     rescue
-      # Daca intre timp stergem linia din BD
+      # Daca intre timp stergem statia din BD
       session[:station_id] = Station.first.id
       @current_station     = Station.find(session[:station_id])
     end

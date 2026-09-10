@@ -48,6 +48,11 @@
   </div>
 
   <div>
+    <%= form.label :times_table, style: "display: block" %>
+    <%= form.text_area :times_table, value: line.times_table, style: "width: 600px", rows: 5 %>
+  </div>
+
+  <div>
     <%= form.label :info, style: "display: block" %>
     <%= form.text_area :info, value: line.info, style: "width: 600px" %>
   </div>
@@ -61,7 +66,7 @@
     <%= form.label :time_threshold, style: "display: block" %>
     <%= form.text_field :time_threshold %>
   </div>
-  j
+
   <div>
     <%= form.label :schedule_weblink, style: "display: block" %>
     <%= form.text_field :schedule_weblink %>

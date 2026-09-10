@@ -1,0 +1,8 @@
+1 6:00 6:30 7:00 Piața Gării <-> Slobozia Nouă
+2 7:30 8:00 8:30 Piața Gării <-> Slobozia Nouă
+3 9:00 9:30 10:00 Piața Gării <-> Slobozia Nouă
+4 9:30 10:00 10:30 Piața Gării <-> Slobozia Nouă
+5 11:00 11:30 12:00 Piața Gării <-> Slobozia Nouă
+6 16:30 17:00 17:30 Piața Gării <-> Slobozia Nouă
+7 19:00 19:30 20:00 Piața Gării <-> Slobozia Nouă
+8 20:30 21:00 21:30 Piața Gării <-> Slobozia Nouă

@@ -7,6 +7,8 @@ class Line < ApplicationRecord
   validates_presence_of :times_table, :time_threshold, :name, :description, :station_list, :modified_at
   has_many :stops
 
+  SIMPLE_SCHEDULE = {"working" => [[1,2,3,4,5], []], "holiday" => [[0,6], []]} # un orar valid dar foarte simplu
+
   # de folosit doar in scaffold-ul stations!
   def stations
     stations = Station.where(id: station_list) # le intoarce in ordinea din BD

@@ -15,6 +15,7 @@ class LinesController < ApplicationController
   def new
     @line = Line.new
     @line.modified_at = Date.today
+    @line.times_table = Line::SIMPLE_SCHEDULE
     if Station.all.count == 1
       # Daca avem o singura statie
       @line.station_list = [Station.first.id, Station.first.id]
@@ -36,7 +37,8 @@ class LinesController < ApplicationController
 
   # POST /lines or /lines.json
   def create
-    times_table_hash = {"working" => [[1,2,3,4,5], []], "holiday" => [[0,6], []]} # un orar valid dar foarte simplu
+    # Serializam intai times_table
+    times_table_hash = eval(params[:line][:times_table]).to_h
     @line = Line.new(line_params.merge(times_table: times_table_hash))
 
     respond_to do |format|
@@ -52,8 +54,10 @@ class LinesController < ApplicationController
 
   # PATCH/PUT /lines/1 or /lines/1.json
   def update
+    # Serializam intai times_table
+    times_table_hash = eval(params[:line][:times_table]).to_h
     respond_to do |format|
-      if @line.update(line_params)
+      if @line.update(line_params.merge(times_table: times_table_hash))
         format.html { redirect_to lines_url, notice: "Line was successfully updated." }
         format.json { render :show, status: :ok, location: @line }
       else
@@ -148,7 +152,7 @@ class LinesController < ApplicationController
 
     # Only allow a list of trusted parameters through.
     def line_params
-      params.require(:line).permit(:name, :description, :priority, :html_color, :station_list, :info, :modified_at, :time_threshold, :schedule_weblink).tap do |whitelisted|
+      params.require(:line).permit(:name, :description, :priority, :html_color, :station_list, :info, :modified_at, :time_threshold, :times_table, :schedule_weblink).tap do |whitelisted|
         whitelisted[:station_list] = whitelisted[:station_list].split(',').map(&:to_i)
       end
     end

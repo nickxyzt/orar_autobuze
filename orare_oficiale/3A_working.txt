@@ -1,0 +1,10 @@
+1 7:20 7:40 8:00 Piața Gării <-> Cartier Tineretului
+2 8:20 8:40 9:00 Piața Gării <-> Cartier Tineretului
+3 9:20 9:40 10:00 Piața Gării <-> Cartier Tineretului
+4 10:20 10:40 11:00 Piața Gării <-> Cartier Tineretului
+5 11:20 11:40 12:00 Piața Gării <-> Cartier Tineretului
+6 12:20 12:40 13:00 Piața Gării <-> Cartier Tineretului
+7 15:15 15:30 15:50 Piața Gării <-> Cartier Tineretului
+8 16:15 16:30 16:50 Piața Gării <-> Cartier Tineretului
+9 18:15 18:30 19:00 Piața Gării <-> Cartier Tineretului
+10 20:15 20:30 20:50 Piața Gării <-> Cartier Tineretului

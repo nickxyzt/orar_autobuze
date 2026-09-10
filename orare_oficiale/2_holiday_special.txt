@@ -1,0 +1,4 @@
+1 7:10 7:45 8:10 Piața Gării <-> BORA
+2 8:35 9:00 9:25 Piața Gării <-> BORA
+3 12:30 13:00 13:30 Piața Gării <-> BORA
+4 18:00 18:25 18:45 Piața Gării <-> BORA
