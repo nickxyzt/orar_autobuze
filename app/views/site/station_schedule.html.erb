@@ -12,7 +12,7 @@
 <% if @error_message %>
   <div class="alert alert-danger"><%= @error_message %></div>
 <% else %>
-  Orar orientativ <%= Time.zone.today.strftime("%d-%m-%Y") %>
+  Orar planificat <%= Time.zone.today.strftime("%d-%m-%Y") %>
   <span class="badge bg-primary"><%= @today_kind_long_name %></span>
 
   <% if @related_stations.size > 1 %>

@@ -10,7 +10,7 @@
 </div>
 
 <div>
-  Orar orientativ <%= Time.zone.today.strftime("%d-%m-%Y") %>
+  Orar planificat <%= Time.zone.today.strftime("%d-%m-%Y") %>
   <span class="badge bg-primary"><%= @today_kind_long_name %></span>
 </div>
 
@@ -66,10 +66,11 @@
             <% @courses_count.times do |index_curse| %>
               <% moment_estimat = @estimated_schedule[index_station][index_curse] %>
 
-              <%# stilul pentru orele de sosire %>
+              <%# stilul pentru orele de sosire a autobuzului in statii %>
               <% td_style = "" %>
               <% td_class = "" %>
-              <% if Moment.new.time >= Moment.new(moment_estimat).time %>
+              <% if moment_estimat.downcase == "x" %>
+              <% elsif Moment.new.time >= Moment.new(moment_estimat).time %>
                 <% unless @special_station_indexes.include? index_station %>
                   <% td_class = "bus-left " %>
                 <% end %>
@@ -209,7 +210,8 @@
 
     <%# Programam refresh paginii pentru urmatoarea sosire in pagina %>
     <%# Calculam intai momentul in care autobuzul va fi intr-o statie in viitor %>
-    <% next_start =  @estimated_schedule.flatten.uniq.map {|elem| Moment.new(elem).time}.select{|elem| elem > max_bus_left_time}.sort.first %>
+      <% next_start =  @estimated_schedule.flatten.uniq.reject {|elem| elem.downcase == "x"}.
+          map {|elem| Moment.new(elem).time}.select{|elem| elem > max_bus_left_time}.sort.first %>
     var interval;
     <% if next_start %>
       interval = <%= ((Moment.new(next_start).to_time - Time.zone.now)* 1000 + 100).to_i %>;

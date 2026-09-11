@@ -6,13 +6,14 @@ class UtilsController < ApplicationController
   # Obtinere orar de pe site-ul oficial, 
   # folosind in link-ul web denumrile statiilor de plecare si de sosire
   def get_schedule
+    @obtained_schedules = {} # putem avea mai multe linii
+
     if request.post?
       # Avem de luat 2 pagini: pentru "working" si "holiday"
       # Intai eliminam parametrul pentru tipul de zi primit
       params["input_link"] = params["input_link"].sub("&zi=we", "")
       params["input_link"] = params["input_link"].sub("&zi=wd", "")
 
-      @obtained_schedule = {}
       ["wd", "we"].each do |dd|
         if dd == "wd"
           day_kind = "working"
@@ -32,18 +33,39 @@ class UtilsController < ApplicationController
 
         doc = Nokogiri::HTML(html)
         
-        departures = []
-        arrivals   = []
-
-        doc.css('span.lv-s2s-dep').each do |span|
-          departures << span.text
+        # Luam fiecare linie in parte (pe ruta aleasa) si construim orarul
+        lines = []
+        doc.css('span.lv-s2s-line').each do |span|
+          lines << span.text
         end
+        lines = lines.uniq
 
-        doc.css('span.lv-s2s-arr').each do |span|
-          arrivals << span.text
+        lines.each do |line|
+          @obtained_schedules[line] = {} if @obtained_schedules[line].blank?
+          departures = []
+          arrivals   = []
+
+          doc.css('span.lv-s2s-dep').each do |span|
+            parent = span.parent.parent
+            found_line = parent.at_xpath('./*[@class="lv-s2s-line"]').text
+            if found_line == line
+              departures << span.text
+            end
+          end
+
+          doc.css('span.lv-s2s-arr').each do |span|
+            parent = span.parent.parent
+            found_line = parent.at_xpath('./*[@class="lv-s2s-line"]').text
+            if found_line == line
+              arrivals << span.text
+            end
+          end
+
+          # Am obtinut un orar pentru un tip de zi pentru o anumita linie
+          obtained_schedule = [days, {0 => departures, "last" => arrivals}]
+          # Il adaugam in lista
+          @obtained_schedules[line][day_kind] = obtained_schedule
         end
-
-        @obtained_schedule[day_kind] = [days, {0 => departures, "last" => arrivals}]
       end
     end
   rescue

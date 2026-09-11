@@ -1,11 +1,14 @@
 <%= render partial: 'menu/menu' %>
 
-<h1>Utilitar: Obtinere orar pornind de la link</h1>
-<h2>Nu uita sa modifici la rezultat "last" cu indexul statiei, si zilele cand merge (daca sunt exceptii)</h2>
+<strong>Utilitar: Obtinere orar linii pornind de la link</strong>
+<div>Nu uita sa modifici zilele cand merge linia (daca sunt exceptii)!</div>
 <%= form_tag do %>
   Introdu linkul:
   <%= text_field_tag 'input_link', params["input_link"], size: 50 %>
-  <%= submit_tag 'trimite', class: 'btn btn-primary' %>
+  <%= submit_tag 'Trimite', class: 'btn btn-primary' %>
 <% end %>
 
-<%= @obtained_schedule %>
+<% @obtained_schedules.each do |line, schedule| %>
+  <div><strong>Linia:</strong> <%= line %></div>
+  <div><strong>Orar:</strong> <%= schedule.to_s.sub(/\A\{/, '').sub(/\}\Z/, '') %></div>
+<% end %>
