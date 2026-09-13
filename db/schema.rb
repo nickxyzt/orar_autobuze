@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2026_09_10_042459) do
+ActiveRecord::Schema[7.0].define(version: 2026_09_13_140109) do
   create_table "lines", force: :cascade do |t|
     t.string "name"
     t.text "station_list"
@@ -48,6 +48,9 @@ ActiveRecord::Schema[7.0].define(version: 2026_09_10_042459) do
     t.datetime "updated_at", null: false
     t.integer "master_station_id"
     t.string "display_name"
+    t.string "short_name"
+    t.decimal "latitude", precision: 10, scale: 7
+    t.decimal "longitude", precision: 10, scale: 7
   end
 
   create_table "stops", force: :cascade do |t|

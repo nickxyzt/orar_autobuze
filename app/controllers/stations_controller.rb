@@ -1,5 +1,6 @@
 class StationsController < ApplicationController
   before_action :set_station, only: %i[ show edit update destroy ]
+  before_action :set_coordinates, only: %i[ create update ]
   after_action  :set_master_station_if_self, only: %i[ create update]
 
   # GET /stations or /stations.json
@@ -66,7 +67,14 @@ class StationsController < ApplicationController
 
     # Only allow a list of trusted parameters through.
     def station_params
-      params.require(:station).permit(:name, :display_name, :master_station_id)
+      params.require(:station).permit(:name, :display_name, :master_station_id, :short_name, :latitude, :longitude)
+    end
+
+    # Setare coordonate
+    def set_coordinates
+      latitude, longitude = params["coordonate"].split(",").map(&:strip)
+      params[:station][:latitude]  = latitude
+      params[:station][:longitude] = longitude
     end
 
     def set_master_station_if_self

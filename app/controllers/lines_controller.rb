@@ -134,7 +134,10 @@ class LinesController < ApplicationController
       values.first.count.times do |index|
         this_time_values = []
         keys.each do |key|
-          this_time_values << schedule[key][index]
+          # Luam doar elementele care NU sunt goale si NU sunt "X"
+          if !schedule[key][index].blank? and schedule[key][index].downcase != "x"
+            this_time_values << schedule[key][index]
+          end
         end
         if this_time_values != this_time_values.sort
           @results << "Linia #{line.name} are gresit timpii #{this_time_values}"

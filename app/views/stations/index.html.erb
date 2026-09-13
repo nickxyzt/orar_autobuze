@@ -10,6 +10,8 @@
       <th>Nume intern</th>
       <th>Nume de afisat</th>
       <th>Statie principala</th>
+      <th>Nume scurt SPTL</th>
+      <th>Coordonate</th>
       <th colspan="2">Actions</th>
     </tr>
   </thead>
@@ -20,6 +22,8 @@
         <td><%= station.name %></td>
         <td><%= station.display_name %></td>
         <td class="<%= station.master_station != station ? "bg-info" : "" %>"><%= station.master_station.name if station.master_station %></td>
+        <td><%= station.short_name %></td>
+        <td><%= [station.latitude, station.longitude].uniq.join(", ") %></td>
         <td><%= link_to 'Edit', edit_station_url(station), class: 'btn btn-outline-primary' %></td>
         <td><%= button_to 'Destroy', station, method: :delete, class: 'btn btn-outline-danger' %></td>
         </td>
