@@ -49,8 +49,13 @@ class SiteController < ApplicationController
       # Verificam daca circula in aceasta zi
       @error_message = "Linia #{@current_line.name} nu circulă în această zi!"
     else
-      @courses_count            = @estimated_schedule.first.size
-      @special_station_indexes  = @current_line.special_station_indexes(Time.zone.today, 0) # Luam statiile speciale ale primei curse
+      @courses_count = @estimated_schedule.first.size
+      # luam statiile speciale ale TUTUROR curselor, si pastram doar pe cele care sunt pe TOATE CURSELE
+      indexes = []
+      @courses_count.times do |index_course|
+        indexes << @current_line.special_station_indexes(Time.zone.today, index_course)
+      end
+      @special_station_indexes = indexes.reduce(:&)
     end
   end
 
