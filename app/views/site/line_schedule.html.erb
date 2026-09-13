@@ -57,27 +57,30 @@
             <% else # statie obisnuita %>
               <% td_style += "background: #fff; z-index: 1;" %>
             <% end %>
+
             <td style="<%= td_style %>" class="<%= td_class %>">
               <%= link_to site_station_schedule_url(station.id), 
                 class: 'btn btn-outline-dark btn-sm', data: { turbo: false } do %>
                 <%= station.display_name %>
               <% end %>
             </td>
-            <% @courses_count.times do |index_curse| %>
-              <% moment_estimat = @estimated_schedule[index_station][index_curse] %>
+
+            <% @courses_count.times do |index_course| %>
+              <% moment_estimat = @estimated_schedule[index_station][index_course] %>
 
               <%# stilul pentru orele de sosire a autobuzului in statii %>
               <% td_style = "" %>
               <% td_class = "" %>
               <% if moment_estimat.downcase == "x" %>
+                <%# Nu facem nimic... %>
               <% elsif Moment.new.time >= Moment.new(moment_estimat).time %>
                 <% unless @special_station_indexes.include? index_station %>
                   <% td_class = "bus-left " %>
                 <% end %>
-                <% if Moment.new(moment_estimat).time > max_bus_left_time %>
+                <% if Moment.new(moment_estimat).time >= max_bus_left_time %>
                   <% max_bus_left_time = Moment.new(moment_estimat).time %>
                   <% max_bus_left_row  = index_station %>
-                  <% max_bus_left_col  = index_curse %>
+                  <% max_bus_left_col  = index_course %>
                 <% end %>
               <% end %>
               <% if @special_station_indexes.include? index_station %>

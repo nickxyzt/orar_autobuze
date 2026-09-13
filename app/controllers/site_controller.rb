@@ -44,7 +44,7 @@ class SiteController < ApplicationController
     @today_kind_long_name     = SpecialDay.new(kind_id: today_kind_id).kind_long_name
 
     # Luam orarul pentru ziua curenta
-    @estimated_schedule   = @current_line.estimated_schedule(Time.zone.today)
+    @estimated_schedule   = @current_line.estimated_schedule(Time.zone.today)[0]
     if @estimated_schedule.blank? or @estimated_schedule[1].blank?
       # Verificam daca circula in aceasta zi
       @error_message = "Linia #{@current_line.name} nu circulă în această zi!"
@@ -89,7 +89,7 @@ class SiteController < ApplicationController
       station_list    = line.station_list
       # Indexurile statiei in aceasta linie
       station_indexes = station_list.each_index.select {|index| station_list[index] == @current_station.id}
-      line_schedule   = line.estimated_schedule(Time.zone.today)
+      line_schedule   = line.estimated_schedule(Time.zone.today)[0]
       special_station_indexes = line.special_station_indexes(Time.zone.today, 0)
       # Doar daca linia circula in aceasta zi!
       if line_schedule

@@ -21,6 +21,8 @@
   Editare Schedule pentru linia <%= @line.name %>
 </div>
 
+<div><strong>Ex: 07:00-07:05 (sosire - plecare)</strong></div>
+<hr />
 <%= form_tag update_schedule_line_path(@line, data: { turbo: false }) do %>
   <% ["working", "holiday", "holiday_special"].each do |day_kind| %>
     <div>
@@ -71,7 +73,7 @@
 
               <div>
                 <%# Casuta cu timpul %>
-                <%= text_field_tag "time_#{day_kind}_#{station_index}", time_value, size: 3 %>
+                <%= text_field_tag "time_#{day_kind}_#{station_index}", time_value, size: 4 %>
               </div>
             <% end %>
           </div>

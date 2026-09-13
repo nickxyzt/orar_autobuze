@@ -24,30 +24,31 @@ class Line < ApplicationRecord
     return !times_table[day_kind_name].nil?
   end
 
-  # Programul estimativ al curselor, calculat!
-  # Un Array de Array {["06:00", ...], ["08:00", ...], ...}
-  # reprezentand orele pentru fiecare statie in parte,
-  # in functie de POZITIA ei in station_list
+  # Programul estimativ al curselor, calculat unde nu este prestabilit!
+  # Un Array de Array {["06:00", ...], ["08:00", ...], ...}, dublu
+  # (orele de SOSIRE si orele de PLECARE)
+  # in functie de POZITIA statiei in line.station_list
   # NU se poate folosi un Hash deoarece 
-  # aceeasi statie (Spital) apare de 2 ori la aceeasi cursa (3A)!
+  # aceeasi statie poate aparea de 2 ori la aceeasi cursa (ex: Spital la 3A)!
   def estimated_schedule(day)
     if circulates_at? day
       day_kind_id             = SpecialDay.kind_id_of(day)
       day_kind_name           = SpecialDay.new(kind_id: day_kind_id).kind_name.to_s
       # Ne folosim de orele de start ale curselor - ele trebuie sa existe obligatoriu la toate cursele
-      start_timetable         = self.times_table[day_kind_name][1].first[1]
+      start_times_table         = self.times_table[day_kind_name][1].first[1]
 
       # Populam cu array-uri goale pentru fiecare STATIE
-      day_estimate_table      = Array.new(station_list.size) {[]}
+      day_estimate_table_arrivals   = Array.new(station_list.size) {[]}
+      day_estimate_table_departures = Array.new(station_list.size) {[]}
 
       # nr de curse
-      nr_of_courses = start_timetable.size
+      nr_of_courses = start_times_table.size
       nr_of_courses.times do |index_course|
 
         # Luam pozitiile statiilor in care nu circula cursa (exceptate)
         excepted_station_indexes = []
         self.times_table[day_kind_name][1].each do |key, value|
-          if value[index_course].downcase.to_s == "x" # daca avem ora fixa in aceasta statie pe aceasta cursa
+          if value[index_course].downcase.to_s == "x"
             excepted_station_indexes << key
           end
         end
@@ -58,7 +59,16 @@ class Line < ApplicationRecord
         index = 0
         self.times_table[day_kind_name][1].each do |key, value|
           if !excepted_station_indexes.include?(key) and !value[index_course].blank? # daca avem ora fixa in aceasta statie pe aceasta cursa
-            day_estimate_table[special_station_indexes[index]] << value[index_course]
+            if value[index_course]["-"]
+              # Daca avem in orar "timp_sosire - timp_plecare", avem ambele momente prestabilite
+              day_estimate_table_arrivals[special_station_indexes[index]]   << value[index_course].split("-")[0]
+              day_estimate_table_departures[special_station_indexes[index]] << value[index_course].split("-")[1]
+            else
+              # Avem doar timpii de sosire in statie, cei de plecare ii facem identici
+              day_estimate_table_arrivals[special_station_indexes[index]]   << value[index_course]
+              day_estimate_table_departures[special_station_indexes[index]] << value[index_course]
+            end
+
             index += 1
           end
         end
@@ -74,22 +84,25 @@ class Line < ApplicationRecord
             # eliminam din statiile intermediare pe cele exceptate!
             intermediary_station_indexes -= excepted_station_indexes
             # Obtinem momentele estimate pentru statiile intermediare
-            new_moments = Moment.split(day_estimate_table[station_start_index][index_course], day_estimate_table[station_end_index][index_course], intermediary_station_indexes.count)
+            # pornind de la PLECAREA din statia 1 pana la SOSIREA in statia 2
+            new_moments = Moment.split(day_estimate_table_departures[station_start_index][index_course], day_estimate_table_arrivals[station_end_index][index_course], intermediary_station_indexes.count)
             # Le introducem in Hash, fara capetele Array-ului cu momentele noi
             # puts "Index cursa: #{index_course}, Statii intermediare: #{intermediary_station_indexes}"
             intermediary_station_indexes[1..-2].each_with_index do |index_station, j|
-              day_estimate_table[index_station] << new_moments[j]
+              day_estimate_table_arrivals[index_station]   << new_moments[j]
+              day_estimate_table_departures[index_station] << new_moments[j]
             end
           end
         end
 
         # In final, adaugam valori "X" la statiile exceptate
         excepted_station_indexes.each do |index_station|
-          day_estimate_table[index_station][index_course] = "X"
+          day_estimate_table_arrivals[index_station][index_course]   = "X"
+          day_estimate_table_departures[index_station][index_course] = "X"
         end
       end
 
-      return day_estimate_table
+      return [day_estimate_table_arrivals, day_estimate_table_departures]
     else
       # Autobuzul nu circula in aceasta zi
       return nil
