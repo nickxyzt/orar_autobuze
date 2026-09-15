@@ -1,14 +1,11 @@
 <%= render partial: 'menu/menu' %>
 
-<strong>Utilitar: Obtinere orar linii pornind de la link</strong>
+<strong>Utilitar: Obtinere orar linii pornind de la short_name din BD</strong>
 <div>Nu uita sa modifici zilele cand merge linia (daca sunt exceptii)!</div>
+<div class="alert alert-danger"><%= @messages %></div>
 <%= form_tag do %>
-  Introdu linkul:
-  <%= text_field_tag 'input_link', params["input_link"], size: 50 %>
-  <%= submit_tag 'Trimite', class: 'btn btn-primary' %>
+  <%= select_tag :line_id, options_for_select(Line.all.map {|line| [line.name, line.id]}, @line_id) %>
+  <%= submit_tag 'Obtine orar oficial', class: 'btn btn-primary' %>
 <% end %>
 
-<% @obtained_schedules.each do |line, schedule| %>
-  <div><strong>Linia:</strong> <%= line %></div>
-  <div><strong>Orar:</strong> <%= schedule.to_s.sub(/\A\{/, '').sub(/\}\Z/, '') %></div>
-<% end %>
+<%= @obtained_schedule %>

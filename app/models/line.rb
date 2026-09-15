@@ -53,7 +53,7 @@ class Line < ApplicationRecord
           end
         end
 
-        # Luam pozitiile statiilor speciale
+        # Luam pozitiile statiilor speciale de pe aceasta cursa
         special_station_indexes = self.special_station_indexes(Time.zone.today, index_course)
         # Le populam cu orele fixe din baza de date
         index = 0
@@ -110,22 +110,37 @@ class Line < ApplicationRecord
   end
 
   # Indexurile liniilor speciale dintr-o zi - pe o anumita cursa!
+  # index_course = numar sau :all
   def special_station_indexes(day, index_course)
     if circulates_at? day
       day_kind_id = SpecialDay.kind_id_of(day)
       day_kind_name = SpecialDay.new(kind_id: day_kind_id).kind_name.to_s
-      indexes = []
-      
-      self.times_table[day_kind_name][1].each do |key, value|
-        # pentru cazurile cand avem ore la o anumita statie
-        # verificam sa avem si pe cursa curenta!
-        # E posibil sa avem ore stabilite fixe doar pentru anumite curse ale liniei
-        if !value[index_course].blank? and value[index_course].downcase != "x"
-          # exista ora prestabilita pentru aceasta cursa, deci o luam
-          indexes << key
-        end
+      # Un Array de Array, fiecare element contine statiile speciale ale fiecare curse
+      result = [] 
+
+      # Stabilim un Array cu indexele curselor (individual sau toate)
+      if index_course == :all
+        # luam lungimea orarului din prima statie (sau Array gol daca nu exista)
+        index_courses = (0 .. self.times_table[day_kind_name][1][0].size - 1).to_a
+      else
+        index_courses = [index_course]
       end
-      indexes
+
+      # Luam fiecare cursa in parte si gasim statiile speciale ale ei
+      # E posibil sa avem ore stabilite fixe doar pentru anumite curse ale liniei
+      index_courses.each do |index_course|
+        this_course_result = []
+        self.times_table[day_kind_name][1].each do |key, value|
+          if !value[index_course].blank? and value[index_course].downcase != "x"
+            # exista ora prestabilita pentru aceasta cursa, deci o luam
+            this_course_result << key
+          end
+        end
+        result << this_course_result
+      end
     end
+    # Facem intersectia tuturor orarelor curselor - obtinem doar statiile speciale comune
+    # Daca nu obtinem nimic, intoarcem indexul pentru prima si ultima statie
+    result = result.reduce(:&) || [0, self.station_list.length - 1]
   end
 end
